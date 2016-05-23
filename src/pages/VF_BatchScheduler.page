@@ -1,0 +1,74 @@
+<apex:page controller="BatchSchedulerController" sidebar="false" showHeader="false">
+<head>
+	<apex:includeScript value="https://code.jquery.com/jquery-2.2.1.min.js"></apex:includeScript>
+	<apex:includeScript value="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></apex:includeScript>
+	<apex:stylesheet value="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"/>
+	<style>
+	body{
+	    background:url(http://thekitemap.com/images/feedback-img.jpg) no-repeat;
+  		background-size: cover;
+  		height:100%;
+	}
+	.jobTable{
+		width:100%;
+	}
+	</style>
+</head>
+    <apex:form style="width:800px; text-align:center; margin:auto;">
+<!--         <apex:pageBlock title="Congratulations {!$User.FirstName}"> -->
+		<apex:pageBlock >
+		<h3>Cron Expression Generator and Scheduler</h3>
+		<br/>
+        <apex:pageMessages />
+        <br/>
+        <br/>
+        <br/>
+        <apex:pageBlockSection columns="2">
+        <apex:selectList value="{!seconds}" size="1" label="Seconds">
+            <apex:selectOptions value="{!items}"/>
+        </apex:selectList>
+       <apex:selectList value="{!minutes}" size="1" label="Minutes">
+            <apex:selectOptions value="{!items}"/>
+        </apex:selectList>
+        <apex:selectList value="{!hours}" size="1" label="Hours">
+            <apex:selectOptions value="{!ItemHours}"/>
+        </apex:selectList>
+        <apex:selectList value="{!dayOfMonth}" size="1" label="Day Of Month">
+            <apex:selectOptions value="{!ItemDayOfMonth}"/>
+        </apex:selectList>
+        <apex:selectList value="{!month}" size="1" label="Month">
+            <apex:selectOptions value="{!ItemMonth}"/>
+        </apex:selectList>
+        <apex:selectList value="{!dayOfWeek}" size="1" label="Day Of Week">
+            <apex:selectOptions value="{!ItemDayOfWeek}"/>
+        </apex:selectList>
+        <apex:selectList value="{!year}" size="1" label="Year">
+            <apex:selectOptions value="{!ItemYear}"/>
+        </apex:selectList>
+         <apex:inputText value="{!JobName}" label="Job Name"/>
+        </apex:pageBlockSection>
+        <br/>
+        <br/>
+		<center>
+        <apex:commandButton action="{!PreviewCronExpression}" value="Preview" />&nbsp;
+        <apex:commandButton action="{!Schedule}" value="Schedule" />&nbsp;
+        <apex:commandButton action="{!WatchSchedules}" value="Watch Schedules" />
+		</center>
+		<br/>
+		<br/>
+        <apex:pageBlockSection >
+        <apex:pageblocktable value="{!jobDetails}" var="jD" rendered="{!NOT(ISNULL(jobDetails))}" styleClass="jobTable">
+          <apex:column headerValue="ID">
+              <apex:outputField value="{!jD.Id}"/>
+          </apex:column>
+          <apex:column headerValue="Job Type">
+              <apex:outputField value="{!jD.JobType}"/>
+          </apex:column>
+          <apex:column headerValue="Name">
+              <apex:outputField value="{!jD.Name}"/>
+          </apex:column>
+      </apex:pageblocktable> 
+        </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

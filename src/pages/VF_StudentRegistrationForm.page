@@ -1,0 +1,64 @@
+<apex:page standardController="Student__c" extensions="StudentRegistrationExtension" showHeader="false" sidebar="false" language="{!selectedLanguage}">
+<head>
+	<apex:includeScript value="https://code.jquery.com/jquery-2.2.1.min.js"></apex:includeScript>
+	<apex:includeScript value="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></apex:includeScript>
+	<apex:stylesheet value="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"/>
+	<script>
+	j$ = jQuery.noConflict();
+	
+	j$(document).ready(function(){
+	
+	});
+	</script>
+</head>
+<apex:form style="width:900px; text-align:center; margin:auto;">
+	<apex:pageblock >
+		<h3>Student Registration Form</h3>
+		<br/>
+		<br/>
+		<br/>
+ 		<apex:pageMessages />
+ 		<br/>
+ 		<apex:pageblocksection columns="1">
+ 		
+ 		<apex:selectList id="language" styleclass="" size="1" value="{!selectedLanguage}" label="Language">
+		<apex:selectOptions value="{!languageList}"/>
+		<apex:actionSupport event="onchange" action="{!languageCheckAction}" />
+		</apex:selectList>
+ 		</apex:pageblocksection>
+ 		<apex:outputPanel > 
+		<apex:pageblocksection columns="2">
+		<apex:inputField value="{!Student__c.Student_Name__c}"></apex:inputField>
+		<apex:inputField value="{!Student__c.Roll_Number__c}"></apex:inputField>
+		<apex:inputField value="{!Student__c.Gender__c}"></apex:inputField>
+		<apex:inputField value="{!Student__c.Course_Applying_for__c}"></apex:inputField>
+		<apex:inputField value="{!Student__c.H_S_C__c}"></apex:inputField>
+		<apex:inputField value="{!Student__c.S_S_C__c}"></apex:inputField>
+		<apex:inputField value="{!Student__c.Country__c}"></apex:inputField>
+		<apex:inputField value="{!Student__c.State__c}"></apex:inputField>
+		<apex:inputField value="{!Student__c.City__c}"></apex:inputField>
+		</apex:pageblocksection>
+		</apex:outputPanel> 
+		<apex:commandButton value="Submit" action="{!submitStudentDetails}"></apex:commandButton>
+	</apex:pageblock>
+</apex:form>
+<!-- <div id="myModal" class="modal fade" role="dialog"> -->
+<!--   <div class="modal-dialog"> -->
+
+<!--     Modal content -->
+<!--     <div class="modal-content"> -->
+<!--       <div class="modal-header"> -->
+<!--         <button type="button" class="close" data-dismiss="modal">&times;</button> -->
+<!--         <h4 class="modal-title">Modal Header</h4> -->
+<!--       </div> -->
+<!--       <div class="modal-body"> -->
+<!--         <p>Some text in the modal.</p> -->
+<!--       </div> -->
+<!--       <div class="modal-footer"> -->
+<!--         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> -->
+<!--       </div> -->
+<!--     </div> -->
+
+<!--   </div> -->
+<!-- </div> -->
+</apex:page>

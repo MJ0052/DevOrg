@@ -1,0 +1,158 @@
+<apex:page showHeader="true" standardStylesheets="false" sidebar="false" applyBodyTag="false" docType="html-5.0" standardController="Product2" extensions="AGMT.SelectProdModelController" action="{!init}">
+
+<html xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <apex:stylesheet value="{!URLFOR($Resource.AGMT__SLDS080, 'SLDS080/assets/styles/salesforce-lightning-design-system-vf.css')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.AGMT__SLDS080, 'SLDS080/assets/icons/utility-sprite/svg/symbols.svg')}" />
+</head>
+
+<style>
+body {
+    margin: 0; /* reset */    
+    /* mimics new standard layout negative space - set main .slds class content to white background */
+    background-color: rgb(244, 246, 249);
+}
+/* mimics new standard layout negative space - set main .slds class content to white background */
+.slds {
+    background-color: #fff!important;
+    border-bottom: 1px solid #d8dde6;
+}
+    html body.sfdcBody { /* fix for Aloha and Lightning Experience */
+    padding: 0!important;
+}
+.slds .slds-card__header.slds-grid {
+    display: block!important;
+    }
+/* Augment Branding */
+.slds a.slds-button--brand, .slds .slds-button--brand {
+    background: #ec6952;
+    border: 1px solid #ec6952;
+    color: #fff;
+}
+.slds .slds-button--brand:hover, .slds .slds-button--brand:focus {
+    background-color:#fff;
+    border: 1px solid #ec6952;
+    color:#ec6952;
+}
+.slds img {
+    height: 100px;
+}
+</style>
+
+
+<body class="augment">
+
+<apex:form id="form">
+<apex:inputHidden id="modelId" value="{!modelId}"/>
+<apex:inputHidden id="thumbnail" value="{!thumbnail}"/>
+<apex:inputHidden id="modelName" value="{!modelName}"/>
+
+<apex:actionFunction action="{!removeModel}" name="removeModel" oncomplete="if( (typeof sforce != 'undefined') && (sforce != null) ) sforce.one.back(true);else window.location='/{!Product2.Id}';"/>
+<apex:actionFunction action="{!selectModel}" name="selectModel" oncomplete="if( (typeof sforce != 'undefined') && (sforce != null) ) sforce.one.back(true);else window.location='/{!Product2.Id}';"/>
+<apex:actionFunction action="{!previousPage}" name="previousPage"/>
+<apex:actionFunction action="{!nextPage}" name="nextPage"/>
+
+    <div class="slds slds-container slds-container--large slds-container--center">
+        <header class="slds-page-header">
+            <div class="slds-grid">
+                <div class="slds-col slds-has-flexi-truncate">
+                    <div class="slds-media slds-media--center slds-has-flexi-truncate">
+                        <div class="slds-media__figure">
+                            <img src="{!URLFOR($Resource.AugmentLogo)}" height="50" style="height:50px!important;" />
+                        </div>
+                        <div class="slds-media__body">
+                            <p class="slds-text-heading--label">Augment for Salesforce</p>
+                            <h1 class="slds-text-heading--medium" title="Setup">Product Model Mapping</h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <div class="slds-m-around--large" style="{!IF(Product2.Augment_ID__c == null, 'display: none', '')}">
+            <div class="slds-card slds-theme--default">
+                <header class="slds-card__header slds-grid grid--flex-spread">
+                    <h3 class="slds-text-heading--small"><strong>Selected Model</strong> &nbsp;for {!Product2.Name}</h3>
+                </header>
+                <section class="slds-card__body slds-p-around--small">
+                    <table border="0" class="slds-table">
+                        <tbody>
+                            <tr>
+                                <td><apex:image rendered="{!IF(Product2.AGMT__Thumbnail__c != null, true, false)}" url="{!Product2.AGMT__Thumbnail__c}" width="100" height="100"/></td>
+                                <td>{!Product2.Model_Name__c}</td>
+                                <td>
+                                    <button class="slds-button slds-button--brand slds-float--right" onclick="removeModel();return false;">Remove</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+        </div>
+        <div class="slds-m-around--large">
+            <div class="slds-card slds-theme--default">
+                <header class="slds-card__header slds-grid">
+                    <button class="slds-button slds-button--neutral slds-float--right" onclick="if( (typeof sforce != 'undefined') && (sforce != null) ) sforce.one.back(true);else window.location='/{!Product2.Id}'; return false;">Cancel</button>
+                    <h3 class="slds-text-heading--small"><strong>Available Models</strong> &nbsp;Select a model to use with product {!Product2.Name}</h3>
+                    <div class="clear"></div>
+                </header>
+                <section class="slds-card__body slds-p-around--small">
+                    <table border="0" class="slds-table">
+                        <tbody>
+                            <tr>
+                                <th>Image</th>
+                                <th>Name</th>
+                                <th></th>
+                            </tr>
+                            <apex:repeat var="model" value="{!models}" rendered="{!models.size != null}" >
+                                <tr>
+                                    <td>
+                                        <apex:image rendered="{!IF(model.thumbnail != '', true, false)}" url="{!model.thumbnail}" height="100"/>
+                                        <apex:image rendered="{!IF(model.thumbnail == '', true, false)}" url="{!$Resource.AGMT__placeholder_thumbnail}" height="100"/>
+                                    </td>
+                                    <td>{!model.Name}</td>
+                                    <td>
+                                        <button class="slds-button slds-button--brand slds-float--right" onclick="executeSelectModel('{!JSENCODE(model.ModelId)}', '{!JSENCODE(model.thumbnail)}', '{!JSENCODE(model.name)}');return false;">Select</button>
+                                    </td>
+                                </tr>
+                            </apex:repeat>
+                        </tbody>
+                    </table>
+                </section>
+                <footer class="slds-card__footer slds-theme--shade slds-p-top--small">
+                    <apex:outputPanel layout="none" rendered="{!nextDisabled}">
+                        <button class="slds-button slds-button--neutral slds-button--icon slds-float--right" disabled="disabled">Next</button>
+                    </apex:outputPanel>
+                    <apex:outputPanel layout="none" rendered="{!NOT(nextDisabled)}">
+                        <button class="slds-button slds-button--neutral slds-button--icon slds-float--right" onclick="nextPage(); return false;">Next</button>
+                    </apex:outputPanel>
+                    <apex:outputPanel layout="none" rendered="{!prevDisabled}">
+                        <button class="slds-button slds-button--neutral slds-button--icon slds-float--right" disabled="disabled">Previous</button>
+                    </apex:outputPanel>
+                    <apex:outputPanel layout="none" rendered="{!NOT(prevDisabled)}">
+                        <button class="slds-button slds-button--neutral slds-button--icon slds-float--right" onclick="previousPage(); return false;">Previous</button>
+                    </apex:outputPanel>
+                    <div class="slds-clear"></div>
+                </footer>
+            </div>
+        </div>
+    </div>
+    
+</apex:form>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<script type='text/javascript' src='/canvas/sdk/js/publisher.js'/>
+<script>
+function executeSelectModel(modelId, thumbnail, modelName) {
+    $('input[id$="modelId"]').val(modelId);
+    $('input[id$="thumbnail"]').val(thumbnail);
+    $('input[id$="modelName"]').val(modelName);
+
+    selectModel();
+}
+</script>
+</body>
+</html>
+   
+</apex:page>

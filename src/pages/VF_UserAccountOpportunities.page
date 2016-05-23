@@ -1,0 +1,209 @@
+<apex:page showheader="false" sidebar="false" standardController="ABC_Inc__c" extensions="UserAccountOpportunitiesExtension">
+    <head>
+        <script>
+        <apex:includescript value="//code.jquery.com/jquery-1.11.1.min.js" / >
+        <apex:stylesheet value="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
+        <apex:includeScript value="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></apex:includeScript>
+		<apex:stylesheet value="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"/>
+			j$ = jQuery.noConflict();
+			j$(document).ready( function () {
+                j$(".closeEye").hide();
+                j$(".openEye").click(function(){
+                    j$(".closeEye").toggle();
+                    j$(".openEye").toggle();
+                    debugger;
+                    j$('[id$=validationCode]').attr("type","text");
+        		});
+                j$(".closeEye").click(function(){
+                    j$(".closeEye").toggle();
+                    j$(".openEye").toggle();
+                    j$('[id$=validationCode]').attr("type","password");	
+        		});
+			});
+        	function sample(accountID){
+                debugger;
+                console.log("HI" + accountID);
+                j$('[id$=myHiddenFieldAccount]').val(accountID);
+                callfind();
+            }
+		</script>
+    </head>
+    
+    <style>
+	body
+	{
+  	background-color: #CECECE;
+  	width: 100%;
+  	height: 100%;
+  	margin: 0;
+	}
+	#content
+	{
+  	position: relative;
+  	top: 50px;
+  	width: 400px;
+  	margin: 0 auto;
+	}
+	#password
+	{
+  	color: black;
+  	font-size: 20px;
+  	width: 400px;
+  	margin: 0 auto;
+  	padding: 15px;
+  	background-color: rgba(0, 0, 0, 0.1);
+  	box-shadow: 0 0 50px 0 rgba(0, 0, 0, .25);
+  	border: 1px solid rgba(255, 255, 255, 0.2);
+  	outline: none;
+	}
+	#password:focus { color: #FFF; }
+	.eye
+	{
+  	position: relative;
+    float: right;
+    /* bottom: 50px; */
+    /* width: 50px; */
+    /* height: 50px; */
+    border: none;
+    outline: none;
+    cursor: pointer;
+    background-position: 0 0;
+    color: #2551D2;
+    font-size: 22px;
+    padding: 0px 25px 0px 0px;
+    margin: -23px 0px 0px 0px;
+	}
+    #content{
+    background-color: whitesmoke;
+    }
+	.eye:active { background-position: -44px 0px; }
+    
+    .outBorder {
+	border: 1px solid gray;
+	}
+	.inBorder {
+	border: 1px solid gray;
+	}
+	.dTable {
+	width: 40%;
+	}
+	.odd {
+        /* background-color: lightblue; */
+	}
+    .even{
+    background-color: lightcyan;    
+    }
+    .link{
+   	color: blue;
+    text-decoration: underline;
+    cursor: pointer;
+    }
+    .link:hover{
+   	color: darkblue;
+    }
+    @keyframes blink {
+  	50% { opacity: 0.0; }
+	}
+	@-webkit-keyframes blink {
+  	50% { opacity: 0.0; }
+	}
+    .blink {
+  	animation: blink 1s step-start 0s infinite;
+  	-webkit-animation: blink 1s step-start 0s infinite;
+	}
+    </style>
+    <apex:form >
+    <apex:actionFunction name="callfind" action="{!getOpportunityByAccount}"/>
+    <apex:inputHidden value="{!myAccount}" id="myHiddenFieldAccount"/>
+        <a href="https://ap2.salesforce.com/">HOME</a>
+        <div class="col-sm-offset-5 col-sm-10">
+        	<apex:outputLabel value="{!username}" id="lblUsername" style="color:#7F04CA;" styleClass="blink" ></apex:outputLabel>
+        </div>
+       	 <div class="col-sm-offset-5 col-sm-10">
+    		<apex:outputLabel value="{!notification}" id="lblNotification" style="color:#E60E0E;"></apex:outputLabel>
+        </div>
+   	<!-- <div id="content">
+    	<div id="box">   
+       		<h2>Sign In</h2>
+       		<br/>
+       		<apex:inputField value="{!ABC_Inc__c.Validation_Code__c}" label="Client" />
+  			<span class="eye openEye" ><i class="fa fa-eye"></i></span>
+       		<span class="eye closeEye" ><i class="fa fa-eye-slash"></i></span>
+        	<br/>
+            <apex:commandButton value="Sign In" action="{!verifyUser}" />
+        </div>
+	</div> -->
+    <div id="formBlock">
+	<div class="form-group">
+		<label for="inputPassword3" class="col-sm-2 control-label">Validation Code</label>
+		<div class="col-sm-2">
+            <!-- <apex:inputField value="{!ABC_Inc__c.Validation_Code__c}"/> -->
+            <apex:inputSecret value="{!ABC_Inc__c.Validation_Code__c}" id="validationCode" />
+            <span class="eye openEye" ><i class="fa fa-eye"></i></span>
+       		<span class="eye closeEye" ><i class="fa fa-eye-slash"></i></span>
+			<!--<input type="password" class="form-control" id="inputPassword3" placeholder="Password" />-->
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="col-sm-offset-2 col-sm-10">
+            <apex:commandButton value="Sign In" action="{!verifyUser}" />
+			<!--<button type="submit" class="btn btn-default">Sign in</button>-->
+		</div>
+	</div>
+	</div>
+    <br/><br/><br/><br/>
+    <div class="form-group">
+    <div class="col-sm-10">
+        <apex:outputLabel rendered="{!ShouldIRenderAccount}">Account List</apex:outputLabel>
+    </div>
+    </div>
+    <br/>
+    <div class="form-group">
+	<div class="col-sm-10">
+    <apex:dataTable value="{!accountList}" var="account" id="accountTable"	rowClasses="odd,even" cellspacing="3" cellpadding="3" styleClass="outBorder dTable"  rendered="{!ShouldIRenderAccount}">
+		<apex:column styleclass="inBorder">
+			<apex:facet name="header">Name</apex:facet>
+				 <span onclick="sample('{!account.Id}');" class="link">{!account.name}</span>
+			</apex:column>
+			<apex:column styleclass="inBorder">
+				<apex:facet name="header">Owner</apex:facet>
+				<apex:outputText value="{!account.name}" />
+			</apex:column>
+	</apex:dataTable>
+    </div>
+    </div>
+    <br/><br/><br/><br/>
+    <div class="form-group">
+    <div class="col-sm-10">
+        <apex:outputLabel rendered="{!ShouldIRenderOpportunity}">Opportunity List</apex:outputLabel>
+    </div>
+    </div>
+    <br/>
+    <div class="form-group">
+    <div class="col-sm-3">
+    <apex:selectList id="statusSelectList" value="{!stage}" size="1" rendered="{!ShouldIRenderOpportunity}">
+    	<apex:selectOption itemValue="Prospecting" itemLabel="Prospecting"/>
+        <apex:selectOption itemValue="Qualification" itemLabel="Qualification"/>
+        <apex:selectOption itemValue="Need Analysis" itemLabel="Need Analysis"/>
+    </apex:selectList>
+    </div>
+    <div class="col-sm-1">
+        <apex:commandButton value="Update" action="{!updateOpportuntityStage}" rendered="{!ShouldIRenderOpportunity}"/>
+    </div>
+    </div>
+    <div class="form-group">
+    <div class="col-sm-10">
+    <apex:dataTable value="{!opportunityList}" var="opportunity" id="opportunityTable"	rowClasses="odd,even" cellspacing="3" cellpadding="3" styleClass="outBorder dTable"   rendered="{!ShouldIRenderOpportunity}">
+		<apex:column styleclass="inBorder">
+			<apex:facet name="header">Name</apex:facet>
+            <span onclick="sample();">{!opportunity.name}</span>
+			</apex:column>
+			<apex:column styleclass="inBorder">
+				<apex:facet name="header">Owner</apex:facet>
+				<apex:outputText value="{!opportunity.name}" />
+			</apex:column>
+	</apex:dataTable>
+    </div>
+    </div>
+    </apex:form>
+</apex:page>

@@ -1,0 +1,101 @@
+<apex:page controller="AGMT.GenericModelsController" docType="html-5.0" standardStylesheets="false" sidebar="true" showHeader="true" action="{!init}">
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+      
+        <apex:stylesheet value="{!URLFOR($Resource.AGMT__cs_assets, '/css/augment-reset.css')}"/>
+        <apex:stylesheet value="{!URLFOR($Resource.AGMT__cs_assets, '/css/augment-bootstrap.css')}"/>
+        <apex:stylesheet value="{!URLFOR($Resource.AGMT__cs_assets, '/css/augment-bootstrap-theme.css')}"/>
+        <apex:stylesheet value="{!URLFOR($Resource.AGMT__cs_assets, '/css/augment-style.css')}"/>
+        <apex:stylesheet value="{!URLFOR($Resource.AGMT__cs_assets, '/css/font-awesome.min.css')}"/>
+
+        <style>
+        .augment .table tr td {
+        	vertical-align: middle!important;
+        }
+        </style>
+
+	</head>
+    <body class="augment">
+    <apex:pageMessages />
+    <apex:form id="modelsFormTest" styleClass="augment" rendered="{!IF(renderForm, true, false)}"> 
+    <!--<div class="panel panel-default" style="display:{!IF(SCProductModel__c.Augment_ID__c != null, "block","none")}">-->
+    <div class="panel panel-default" style="display:{!IF(product['Augment_ID__c'] != null, "block","none")}">
+	  <div class="panel-heading">
+	    <h3 class="panel-title">Selected Model <small>for Test Op GenWatt Diesel 1000kW</small>
+	    <!--<apex:commandButton value="Remove" action="{!removeModel}" styleClass="btn btn-default btn-xs pull-right" rendered="{!IF(SCProductModel__c.Thumbnail__c != null, true, false)}"/>-->
+	    <apex:commandButton value="Remove" action="{!removeModel}" styleClass="btn btn-default btn-xs pull-right" rendered="{!IF(product['Thumbnail__c'] != null, true, false)}"/>
+  <div class="clearfix"></div></h3>
+	  </div>
+	  <div class="panel-body">
+	<table border="0" class="table table-condensed table-hover">
+		<tbody>
+	    	<tr>
+	            <!--<td><apex:image rendered="{!IF(SCProductModel__c.Thumbnail__c != null, true, false)}" url="{!SCProductModel__c.Thumbnail__c}" width="100" height="100"/></td>
+	            <td>{!SCProductModel__c.Model_Name__c}</td>-->
+	            <td><apex:image rendered="{!IF(product['Thumbnail__c'] != null, true, false)}" url="{!product['Thumbnail__c']}" width="100" height="100"/></td>
+	           	<td>{!product['Model_Name__c']}</td>
+	        </tr>
+	    </tbody>
+	</table>
+	</div>
+	</div>
+	<div class="panel panel-default">
+	  <div class="panel-heading">
+	    <h3 class="panel-title">Available Models <small>Select a model to use with product {!product['Name']}<!--{!SCProductModel__c.Name}-->
+<apex:commandButton value="Cancel" action="{!cancel}" styleClass="btn btn-default btn-xs pull-right" /> 
+	   <div class="clearfix"></div></small></h3>
+	  </div>
+	  <div class="panel-body">
+	    <table border="0" class="table table-condensed table-hover" >
+	        <tr>
+	            <th>Image</th>
+	            <th>Name</th>
+	            <th></th>
+	        </tr>
+	        <apex:repeat var="model" value="{!models}" rendered="{!models.size != null}" >
+	        <tr>
+	        	<td>
+	            	<apex:image rendered="{!IF(model.thumbnail != '', true, false)}" url="{!model.thumbnail}"  height="100"/>
+                    <apex:image rendered="{!IF(model.thumbnail == '', true, false)}" url="{!$Resource.AGMT__placeholder_thumbnail}"  height="100"/>
+	            </td>
+	            <td>{!model.Name}</td>
+	            <td>
+	            	<apex:commandButton value="Select" action="{!selectModel}" reRender="modelsForm" styleClass="btn-cta-primary btn-xs">
+						<apex:param name="modelId" value="{!model.ModelId}" assignTo="{!modelId}"/>
+						<apex:param name="thumbnail" value="{!model.thumbnail}" assignTo="{!thumbnail}"/>
+						<apex:param name="modelName" value="{!model.name}" assignTo="{!modelName}"/>
+					</apex:commandButton>
+				</td>
+	        </tr>
+	        </apex:repeat>
+	    </table>
+        <apex:outputText rendered="{!models.size == 0}" 
+            style="text-align: center; width: 100%; display: block; color: red; font-size: 14px;" 
+            value="There are no models in your Augment account. Please upload some 3d models on your Augment account, then return to connect them to Salesforce.">
+        </apex:outputText>
+	  </div>
+	  <div class="panel-footer">
+	  	<div class="btn-group pull-right">
+	  		
+	  		<div class="btn-group">
+	  			<apex:commandButton value="Previous" action="{!previousPage}" styleClass="btn btn-default btn-xs pull-right" disabled="{!prevDisabled}"/>
+	  		</div>
+	  		<div class="btn-group">
+	  			<apex:commandButton value="Next" action="{!nextPage}" styleClass="btn btn-default btn-xs pull-right" disabled="{!nextDisabled}"/>
+	  		</div>
+	  	</div>
+	  	<div class="clearfix"></div>
+	  </div>
+	</div>
+    </apex:form>
+
+    <apex:form rendered="{!IF(renderForm, false, true)}">
+    	<apex:commandButton value="Return" action="{!cancel}" styleClass="btn btn-default btn-xs"/>
+    </apex:form>
+	</body>
+</html> 
+</apex:page>

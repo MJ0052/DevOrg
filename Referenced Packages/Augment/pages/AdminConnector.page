@@ -1,0 +1,971 @@
+<apex:page showHeader="true" standardStylesheets="false" sidebar="false" applyBodyTag="false" docType="html-5.0" tabStyle="Setup__tab" controller="AGMT.AdminConnectorController" action="{!checkMetadataAPIConnection}">
+
+<html ng-app="adminConnector" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <apex:stylesheet value="{!URLFOR($Resource.AGMT__SLDS080, 'SLDS080/assets/styles/salesforce-lightning-design-system-vf.css')}"/>
+    <apex:stylesheet value="{!URLFOR($Resource.AGMT__SLDS080, 'SLDS080/assets/icons/utility-sprite/svg/symbols.svg')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.AGMT__cs_assets, '/libs/angular.min.js')}"/>
+    <script type="text/javascript">
+        var metadataConnectionWarning = '{!MetadataConnectionWarning}';
+        function doSomething(value){
+            document.getElementById("selectObjButton").disabled = true;
+            document.getElementById("genButton").disabled = true;
+            mobileConfig.remoteData.customObject = value;
+            if( (typeof sforce != 'undefined') && (sforce != null) ) {
+                document.getElementById("genButton").href = "/one/one.app#/setup/object/"+value;
+                setCustomButtons(value);
+            }
+            else {
+                if(value.indexOf('__c') == -1) {
+                    document.getElementById("genButton").href = "/ui/setup/Setup?setupid="+value;
+                    setCustomButtons(value);
+                }
+                else {
+                    //Need to get the object ID to return
+                    getCustomObjId(value);
+                }
+            }
+        }
+        function openCreateAccountWindow() {
+            window.open("https://manager.augmentedev.com/","CreateAugmentAccount");
+        }
+        function setCustomButtons(value) {
+            if(value == '') {
+                document.getElementById("selectObjButton").disabled = true;
+                document.getElementById("genButton").disabled = true;
+            }
+            else {
+                document.getElementById("selectObjButton").disabled = false;
+                document.getElementById("genButton").disabled = false;
+            }
+        }
+        function getCustomObjId(value) {
+
+            Visualforce.remoting.Manager.invokeAction(
+                '{!$RemoteAction.AdminConnectorController.getCustomObjectId}',
+                value, 
+                function(result, event){
+                    if (event.status) {
+                        //alert(result);
+                        document.getElementById("genButton").href = "/"+result;
+                        setCustomButtons(result);
+                    } else {
+                        //alert('error: ' + event.message);
+                        return;
+                    }
+                }, 
+                { buffer: true, escape: false, timeout: 30000 }
+            );
+        }
+        function createRemoteSite(){
+            // Calls the Metdata API from JavaScript to create the Remote Site Setting to permit Apex callouts
+            var binding = new XMLHttpRequest();
+            var request =
+            '<?xml version="1.0" encoding="utf-8"?>' +
+            '<env:Envelope xmlns:env="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">'+
+                '<env:Header>' +
+                    '<urn:SessionHeader xmlns:urn="http://soap.sforce.com/2006/04/metadata">' +
+                        '<urn:sessionId>{!$Api.Session_ID}</urn:sessionId>' +
+                    '</urn:SessionHeader>' +
+                '</env:Header>' +
+                '<env:Body>' +
+                    '<createMetadata xmlns="http://soap.sforce.com/2006/04/metadata">' +
+                        '<metadata xsi:type="RemoteSiteSetting">' +
+                            '<fullName>Augment_SFDC</fullName>' +
+                            '<description>Metadata API Remote Site Setting for Augment</description>' +
+                            '<disableProtocolSecurity>false</disableProtocolSecurity>' +
+                            '<isActive>true</isActive>' +
+                            '<url>https://{!Host}</url>' +
+                        '</metadata>' +
+                    '</createMetadata>' +
+                '</env:Body>' +
+            '</env:Envelope>';
+            binding.open('POST', 'https://{!Host}/services/Soap/m/34.0');
+            binding.setRequestHeader('SOAPAction','""');
+            binding.setRequestHeader('Content-Type', 'text/xml');
+            binding.onreadystatechange =
+                function() {
+                    if(this.readyState==4) {
+                        var parser = new DOMParser();
+                        var doc  = parser.parseFromString(this.response, 'application/xml');
+                        var errors = doc.getElementsByTagName('errors');
+                        if(errors == null || errors.length == 0) {
+                            metadataConnectionWarning = '';
+                        }
+                        else {
+                            var messageText = '';
+                            for(var errorIdx = 0; errorIdx < errors.length; errorIdx++) {
+                                messageText+= errors.item(errorIdx).getElementsByTagName('message').item(0).innerHTML + '\n';
+                            }
+                            document.getElementById('openModal').style.display = 'none';
+                            document.getElementById('selectObjErrorMsg').innerHTML = messageText;
+                            angular.element('#adminFormController').scope().custObjError.status = true;
+                        }
+                    }
+                }
+            binding.send(request);
+        }
+        mobileConfig = {
+            staticResource: '{!$Resource.cs_assets}',
+            remoteData: {
+                requestApiKey: '{!$RemoteAction.AdminConnectorController.returnAPIKEY}',
+                saveApiKey: '{!$RemoteAction.AdminConnectorController.saveAPIKEY}',
+                saveObjModelPrefs: '{!$RemoteAction.AdminConnectorController.saveObjectModelPreference}',
+                generateAssets: '{!$RemoteAction.AdminConnectorController.generateAssets}',
+                customObject: '{!JSENCODE(HTMLENCODE(customMap.objectAPI))}',
+                getComponents: '{!$RemoteAction.AdminConnectorController.getCreatedComponents}'
+            },
+            page: {
+                name: '{!$CurrentPage.Name}'
+            }
+        };
+
+        angular.module('adminConnector', [])
+            ///////Config
+            .config([function ($stateProvider, $urlRouterProvider) { 
+            }])
+
+            ///////Controller
+            .controller('adminFormController', ['$scope', 'RequestApiFactory', 'SaveApiKeyFactory','SaveObjModelPrefsFactory','GenerateAssetsFactory','GetComponentListFactory', function ($scope, RequestApiFactory, SaveApiKeyFactory, SaveObjModelPrefsFactory, GenerateAssetsFactory,GetComponentListFactory) {
+                this.loginCreds = {
+                    username:'',
+                    password:''
+                };
+
+                this.componentList = {};
+                this.apikeyExists = {!APIkeyStatus};
+                this.custObjExists = {!CustObjStatus};
+                this.curObjModelPref = '{!ObjectModelPreference}';
+                
+                // temporary flags to control page state
+                this.requestReturn = {status : false};
+                this.apikeySaved = {status : false};
+                this.apikeyError = {status : false};
+                
+                this.custObjSaved = {status : false};
+                this.custObjError = {status : false};
+
+                this.generatingAssets = false;
+                
+                // place holder for api response
+                this.response = {};
+
+                // check for the the apikey
+                this.isAPIkeySavedOrExisting = function (saved,exist,error) { 
+                    return ((saved === true || exist === 'true' || error === true) ? false : true);
+                };
+
+                this.existsWithOutError = function (exist,error) {
+                    return ((exist === 'true' && error === false) ? true : false);
+                };
+
+                this.isSavedWithOutError = function (saved,error) {
+                    return ((saved === true && error === false) ? true : false);
+                };
+
+                this.isobjSavedOrExisting = function (saved,exist,error) { 
+                    return ((saved === true || exist === 'true' || error === true) ? false : true);
+                };
+
+                this.isobjSavedWithOutError = function (saved,error) {
+                    return ((saved === true && error === false) ? true : false);
+                };
+
+                this.objexistsWithOutError = function (exist,error) {
+                    return ((exist === 'true' && error === false) ? true : false);
+                };
+                
+                //if now apikey exists get the api key based on the username and password
+                this.getAPIkey = function () {
+                    RequestApiFactory($scope.admin.loginCreds).then(function(result) {
+                        $scope.admin.response = angular.fromJson(result);
+
+                        if (typeof $scope.admin.response.name !== 'undefined') {
+                            SaveApiKeyFactory($scope.admin.response.name,$scope.admin.response.email,$scope.admin.response.api_key,$scope.admin.response.uuid).then(function(result) {
+                                if (result === 'success'){
+                                    $scope.admin.apikeyError.status = false;
+                                    $scope.admin.apikeyExists.status = 'false'; 
+                                    $scope.admin.apikeySaved.status = true;   
+                                }
+                            });
+                        } else {
+                            $scope.admin.requestReturn.status = false;
+                            $scope.admin.apikeyExists.status = 'false';
+                            $scope.admin.apikeyError.status = true;
+                        }
+                    });
+                };
+
+                this.getComponentList = function() {
+                    GetComponentListFactory().then(function(result) {
+                        $scope.admin.componentList = angular.fromJson(result);
+                    });
+                }
+
+                $scope.checkboxModel = {
+                   standardValue : false,
+                   customValue : false
+                };
+                if(this.curObjModelPref == 'Standard') {
+                    $scope.checkboxModel.standardValue = true;
+                }
+                else if(this.curObjModelPref == 'Custom') {
+                    $scope.checkboxModel.customValue = true;
+                }
+
+                $scope.updateSelection = function($event) {
+                    var checkbox = $event.target;
+                    if(checkbox.id == 'useStandard') {
+                        $scope.checkboxModel.customValue = false;
+                    }
+                    else if(checkbox.id == 'useCustom') {
+                        $scope.checkboxModel.standardValue = false;
+                    }
+                    app.ui.closeNotification('PrefsSaveSuccess');
+                    app.ui.closeNotification('PrefsSaveError');
+                };
+                
+                this.prefsSaveSuccess = {value: false};
+                this.prefsSaveError = {value: false};
+
+                //Show Help on tabs
+                this.helpStandardObj = {value: false};
+                this.helpCustomObj = {value: false};
+                this.helpStatus = {value: false};
+                this.helpCreatedComponents = {value: false};
+
+                this.showStandardHelp = function($scope){
+                    this.helpStandardObj.value = true;
+                }
+                this.showCustomHelp = function($scope){
+                    this.helpCustomObj.value = true;
+                }
+                this.showHelp = function($scope){
+                    this.helpStatus.value = true;
+                }
+                this.toggleCreatedComponents = function($scope){
+                    this.helpCreatedComponents.value = !this.helpCreatedComponents.value;
+                }
+
+                this.showModal = function($scope){
+                    document.getElementById('openModal').style.display = '';
+                }
+
+                this.cancelModal = function($scope){
+                    document.getElementById('openModal').style.display = 'none';
+                }
+
+                // save/update the returned api key to the API_Settings__c custom settings
+                this.saveAPIkey = function (){
+                };
+
+                this.savePrefs = function () {
+                    app.ui.closeNotification('PrefsSaveSuccess');
+                    app.ui.closeNotification('PrefsSaveError');
+                    if($scope.checkboxModel.standardValue == true) {
+                        this.curObjModelPref = 'Standard';
+                    }
+                    else if($scope.checkboxModel.customValue == true) {
+                        this.curObjModelPref = 'Custom';
+                    }
+                    SaveObjModelPrefsFactory(this.curObjModelPref).then(function(result) {
+                        if (result === 'success'){
+                            app.ui.openNotification('PrefsSaveSuccess');
+                            app.ui.closeNotification('PrefsSaveError');
+                        }
+                        else {
+                            app.ui.closeNotification('PrefsSaveSuccess');
+                            app.ui.openNotification('PrefsSaveError');
+                        }
+                    });
+                };
+                
+                this.generateAssets = function (){
+                    $scope.admin.generatingAssets = true;
+                    document.getElementById('genAssetOk').disabled = true;
+                    document.getElementById('selectObjButton').disabled = true;
+                    document.getElementById('genButton').disabled = true;
+                    console.log(mobileConfig.remoteData.customObject);
+                    this.generateAssetsFactory();
+                };
+
+                this.generateAssetsFactory = function (){
+                    GenerateAssetsFactory(mobileConfig.remoteData.customObject).then(function(result) {
+                        document.getElementById('openModal').style.display = 'none';
+                         if (result === 'success'){
+                                    console.log('success');
+                                     $scope.admin.custObjError.status = false;
+                                     $scope.admin.custObjSaved.status = true;   
+                                
+                        } else {
+                            console.log('error');
+                                 $scope.admin.custObjError.status = true;
+                                 console.log(result);
+                        }
+                        $scope.admin.getComponentList();
+                        $scope.admin.generatingAssets = false;
+                        document.getElementById('genAssetOk').disabled = true;
+                        document.getElementById('selectObjButton').disabled = false;
+                        document.getElementById('genButton').disabled = false;
+                    });
+                }
+
+            }])
+
+        ///////Factory
+        .factory('RequestApiFactory', ['$q', '$rootScope', function ($q, $rootScope) {
+            return function(input) {
+                var deferred = $q.defer();
+                Visualforce.remoting.Manager.invokeAction(
+                    mobileConfig.remoteData.requestApiKey,input,
+                    function(result, event) {
+                        $rootScope.$apply(function() {
+                            if (event.status) {
+                                deferred.resolve(result);
+                            } else {
+                                deferred.reject(event);
+                            }
+                        });
+                    },
+                    { buffer: true, escape: false, timeout: 30000 }
+                );
+
+                return deferred.promise;
+            };
+        }])
+        ///////Factory
+        .factory('GetComponentListFactory', ['$q', '$rootScope', function ($q, $rootScope) {
+            return function() {
+                var deferred = $q.defer();
+                console.log('In Factory');
+                Visualforce.remoting.Manager.invokeAction(
+                    mobileConfig.remoteData.getComponents,
+                    function(result, event) {
+                        $rootScope.$apply(function() {
+                            if (event.status) {
+                                deferred.resolve(result);
+                            } else {
+                                deferred.reject(event);
+                            }
+                        });
+                    },
+                    { buffer: true, escape: false, timeout: 30000 }
+                );
+
+                return deferred.promise;
+            };
+        }])
+        .factory('SaveApiKeyFactory', ['$q', '$rootScope', function ($q, $rootScope) {
+         return function(username,email,apikey,uuid) {
+             var deferred = $q.defer();
+             Visualforce.remoting.Manager.invokeAction(
+                 mobileConfig.remoteData.saveApiKey,username,email,apikey,uuid,
+                 function(result, event) {
+                     $rootScope.$apply(function() {
+                       if (event.status) {
+                         deferred.resolve(result);
+                       } else {
+                         deferred.reject(event);
+                       }
+                     })
+                 },
+                 { buffer: true, escape: false, timeout: 30000 }
+             );
+
+             return deferred.promise;
+         }
+        }])
+        .factory('SaveObjModelPrefsFactory', ['$q', '$rootScope', function ($q, $rootScope) {
+         return function(curObjModelPref) {
+             var deferred = $q.defer();
+             Visualforce.remoting.Manager.invokeAction(
+                 mobileConfig.remoteData.saveObjModelPrefs,curObjModelPref,
+                 function(result, event) {
+                     $rootScope.$apply(function() {
+                       if (event.status) {
+                         deferred.resolve(result);
+                       } else {
+                         deferred.reject(event);
+                       }
+                     })
+                 },
+                 { buffer: true, escape: false, timeout: 30000 }
+             );
+
+             return deferred.promise;
+         }
+        }])
+        .factory('GenerateAssetsFactory', ['$q', '$rootScope', function ($q, $rootScope) {
+         return function(objapiName) {
+             var deferred = $q.defer();
+             Visualforce.remoting.Manager.invokeAction(
+                 mobileConfig.remoteData.generateAssets,objapiName,
+                 function(result, event) {
+                     $rootScope.$apply(function() {
+                       if (event.status) {
+                         deferred.resolve(result);
+                       } else {
+                         deferred.reject(event);
+                       }
+                     })
+                 },
+                 { buffer: true, escape: false, timeout: 30000 }
+             );
+
+             return deferred.promise;
+         }
+        }])          
+        .directive('ngEnter', function () {
+            return function (scope, element, attrs) {
+                element.bind("keydown keypress", function (event) {
+                    if(event.which === 13) {
+                        scope.$apply(function (){
+                            scope.$eval(attrs.ngEnter);
+                        });
+         
+                        event.preventDefault();
+                    }
+                });
+            };
+        })
+        /////////---------------------------------------------------////////
+        ;///////---------------THIS IS THE END!!!!!-----------------////////
+        ////////----------------------------------------------------////////
+    </script>
+</head>
+
+<style>
+body {
+    margin: 0; /* reset */    
+    /* mimics new standard layout negative space - set main .slds class content to white background */
+    background-color: rgb(244, 246, 249);
+}
+html body.sfdcBody { /* fix for Aloha and Lightning Experience */
+    padding: 0!important;
+}
+/* mimics new standard layout negative space - set main .slds class content to white background */
+.slds {
+    background-color: #fff!important;
+    border-bottom: 1px solid #d8dde6;
+}
+/* override form - horizontal being text-align right */
+.slds-form--horizontal {
+    text-align: left!important;
+}
+.slds-select {
+    width:100px
+}
+.slds h2 .slds-button--small {
+  font-size: 50%;
+}
+.slds small {
+  color:rgba(255, 182, 8, 0.98) ;    
+}
+/* button groups were touching - set margin to SLDS margin from top header */
+.slds .slds-tabs__content .slds-button-group.slds-float-right {
+    margin: 1.5rem auto;
+}
+
+.slds .slds-tabs--default > .slds-tabs__content {
+  padding:0;
+}
+
+/* Augment Branding */
+.slds a.slds-button--brand, .slds .slds-button--brand, .slds .slds-button--brand:focus {
+    background: #ec6952;
+    border: 1px solid #ec6952;
+    color: #fff;
+}
+.slds .slds-button--brand:hover {
+    background-color:#fff;
+    border: 1px solid #ec6952;
+    color:#ec6952;
+}
+</style>
+
+<body class="augment">
+    <div ng-controller="adminFormController as admin" class="slds slds-container slds-container--large slds-container--center" ng-init="admin.getComponentList();">
+        <header class="slds-page-header">
+            <div class="slds-grid">
+                <div class="slds-col slds-has-flexi-truncate">
+                    <div class="slds-media slds-media--center slds-has-flexi-truncate">
+                        <div class="slds-media__figure">
+                            <img src="{!URLFOR($Resource.AugmentLogo)}" height="50" style="height:50px!important;" />
+                        </div>
+                        <div class="slds-media__body">
+                            <p class="slds-text-heading--label">Augment for Salesforce</p>
+                            <h1 class="slds-text-heading--medium" title="Setup">Setup</h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <div class="slds-tabs--default">
+            <ul class="slds-tabs--default__nav" role="tablist">
+                <li class="slds-tabs__item slds-text-heading--label slds-active" title="Step1" role="presentation" id="tabStep1"><a href="#" role="tab" tabindex="0" aria-selected="true" onclick="app.ui.switchTab('Step1'); return false;"><strong>1:</strong> Connect</a></li>
+                <li class="slds-tabs__item slds-text-heading--label" title="Step2" id="tabStep2"><a href="#" onclick="app.ui.switchTab('Step2'); return false;" role="tab" tabindex="-1" aria-selected="false"><strong>2:</strong> Plan</a></li>
+                <li class="slds-tabs__item slds-text-heading--label" title="Step3" id="tabStep3"><a href="#" role="tab" tabindex="-1" aria-selected="false" onclick="app.ui.switchTab('Step3'); return false;"><strong>3:</strong> Configure </a></li>
+                <li class="slds-tabs__item slds-text-heading--label" title="Step4" id="tabStep4"><a href="#" role="tab" tabindex="-1" aria-selected="false" onclick="app.ui.switchTab('Step4'); return false;"><strong>4:</strong> Map </a></li>
+            </ul>
+            <div class="slds-tabs__content slds-show" role="tabpanel" id="tabContentStep1">
+                <section aria-labelledby="Step1" class="slds-p-around--large">
+                    <div class="slds-card slds-theme--default">
+                        <header class="slds-card__header slds-grid grid--flex-spread">
+                            <h3 class="slds-text-heading--small">Connect Augment</h3>
+                        </header>
+                        <section class="slds-card__body slds-p-around--small">
+                            <!-- <p class="slds-text-body--medium">Connect your Augment Account to Salesforce. If you do not already have an Augment Account, <a href="https://manager.augmentedev.com/" target="_blank">click here</a> to create an Account.</p> -->
+                            <p class="slds-text-body--medium">Connect your Augment Account to Salesforce. If you do not already have an Augment Account, <button class="slds-button" onclick="openCreateAccountWindow();">click here</button> to create an Account.</p>
+                            <div class="slds-m-around--small">
+                                <form class="slds-form--inline">
+                                    <div class="slds-form-element">
+                                        <label class="slds-form-element__label" for="username">User Name</label>
+                                        <div class="slds-form-element__control">
+                                            <input id="username" class="slds-input" type="text" placeholder="User Name" ng-model="admin.loginCreds.username" ng-enter="admin.getAPIkey()"/>
+                                        </div>
+                                    </div>
+                                    <div class="slds-form-element">
+                                        <label class="slds-form-element__label" for="password">Password</label>
+                                        <div class="slds-form-element__control">
+                                            <input id="password" class="slds-input" type="password" placeholder="password" ng-model="admin.loginCreds.password" ng-enter="admin.getAPIkey()"/>
+                                        </div>
+                                    </div>
+                                    <button class="slds-button slds-button--brand" type="button" ng-enter="admin.getAPIkey()" ng-click="admin.getAPIkey()">Submit</button>
+                                </form>
+                            </div>
+                        </section>
+                    </div>
+                    <div class="slds-card slds-theme--default">
+                        <header class="slds-card__header slds-grid grid--flex-spread">
+                            <h3 class="slds-text-heading--small">Login Status</h3>
+                        </header>
+                        <section class="slds-card__body slds-p-around--small">
+                            <p class="slds-text-body--medium" ng-show="admin.isAPIkeySavedOrExisting(admin.apikeySaved.status,admin.apikeyExists.status,admin.apikeyError.status)">
+                                <span ng-show="admin.requestReturn.status == false">
+                                    <button class="slds-button" style="color: red;">
+                                        <svg aria-hidden="true" class="slds-icon slds-icon--x-small">
+                                            <use xlink:href="{!URLFOR($Resource.SLDS080, 'SLDS080/assets/icons/utility-sprite/svg/symbols.svg#check')}"></use>
+                                        </svg>
+                                    </button>
+                                    You are not logged in!
+                                </span>
+                                <div ng-show="admin.requestReturn.status == true" >
+                                    <div class="col-sm-8"><br /><div class="panel-title">The API key: (<small>{{admin.response.api_key}}</small>) for <strong>{{admin.response.email}}</strong> is available.</div></div>
+                                    <div class="col-sm-4"> <button type="button" class="btn btn-cta-primary" ng-enter="admin.saveAPIkey()" ng-click="admin.saveAPIkey()" >Save API KEY</button></div>
+                                </div>
+                            </p>
+                        
+                        
+                            <p class="slds-text-body--medium" ng-show="admin.existsWithOutError(admin.apikeyExists.status, admin.apikeyError.status)">
+                                <button class="slds-button">
+                                    <svg aria-hidden="true" class="slds-icon slds-icon--x-small">
+                                        <use xlink:href="{!URLFOR($Resource.SLDS080, 'SLDS080/assets/icons/utility-sprite/svg/symbols.svg#check')}"></use>
+                                    </svg>
+                                </button>
+                                You are logged in as {{admin.apikeyExists.email}}
+                            </p>
+                            <p class="slds-text-body--medium" ng-show="admin.isSavedWithOutError(admin.apikeySaved.status, admin.apikeyError.status)">
+                                <button class="slds-button">
+                                    <svg aria-hidden="true" class="slds-icon slds-icon--x-small">
+                                        <use xlink:href="{!URLFOR($Resource.SLDS080, 'SLDS080/assets/icons/utility-sprite/svg/symbols.svg#check')}"></use>
+                                    </svg>
+                                </button>
+                                You are logged in as {{admin.response.email}}
+                            </p>
+                            <p class="slds-text-body--medium" style="color: red;" ng-show="admin.apikeyError.status == true">
+                                <button class="slds-button">
+                                    <svg aria-hidden="true" class="slds-icon slds-icon--x-small">
+                                        <use xlink:href="{!URLFOR($Resource.SLDS080, 'SLDS080/assets/icons/utility-sprite/svg/symbols.svg#error')}"></use>
+                                    </svg>
+                                </button>
+                                Error: {{admin.response.error_type}}: {{admin.response.reason}}
+                            </p>
+                        </section>
+                    </div>
+                </section>
+            </div>
+            <div class="slds-tabs__content slds-hide" role="tabpanel" id="tabContentStep2">
+                <section aria-labelledby="tabStep2" class="slds-p-around--large">
+                    <div class="slds-card slds-theme--default">
+                        <section class="slds-card__body slds-p-around--small">
+                            <p class="slds-text-body--medium">
+                                Please check the box that applies to your deployment:<br/>
+                                <label class="slds-checkbox" for="useStandard">
+                                    <input type='checkbox' id="useStandard" ng-click="updateSelection($event)" ng-model="checkboxModel.standardValue"/>
+                                    <span class="slds-checkbox--faux"></span>
+                                    <span class="slds-form-element__label">Use Augment with the Opportunities, Products, and Opportunities Products Standard Objects</span>
+                                </label><br/>
+                                <button class="slds-button" ng-click="admin.showStandardHelp();">
+                                    Click Here for Further Details
+                                </button>
+                                <div class="instructions" ng-show="admin.helpStandardObj.value">
+                                    <ol class="slds-theme--shade">
+                                        <li> By making this selection you can map a 3d model to each of your Products, which will</li>
+                                        <li> automatically make them accessible from Opportunity Products or the Line Item object</li>
+                                        <li> of your choice. You then launch the Augment [iOS/Android] Application from the</li>
+                                        <li> Opportunity in <font style="font-style:italic;font-weight:bold;">Salesforce1.</font></li>
+                                    </ol>
+                                </div><br/>
+                                <label class="slds-checkbox" for="useCustom">
+                                    <input type='checkbox' id="useCustom" ng-click="updateSelection($event)" ng-model="checkboxModel.customValue"/>
+                                    <span class="slds-checkbox--faux"></span>
+                                    <span class="slds-form-element__label">Use Augment with a Custom Object</span>
+                                </label><br/>
+                                <button class="slds-button" ng-click="admin.showCustomHelp();">
+                                    Click Here for Further Details
+                                </button>
+                                <div class="instructions" ng-show="admin.helpCustomObj.value">
+                                    <ol class="slds-theme--shade">
+                                        <li> By making this selection you can map a 3d model to any Custom object you wish.  This</li>
+                                        <li> will allow you to map to whatever objects your organization uses for deals, orders, or</li>
+                                        <li> products.  Additionally you will be able to choose to launch the Augment [iOS/Android]</li>
+                                        <li> Application from that Custom object in <font style="font-style:italic;font-weight:bold;">Salesforce1.</font></li>
+                                    </ol>
+                                </div>
+                            </p>
+                            <div id='notificationPrefsSaveSuccess' class="slds-hide">
+                                <div class="slds-notify slds-notify--alert slds-theme--alert-texture slds-theme--success" role="alert">
+                                  <span class="slds-assistive-text">Info</span>
+                                  <button class="slds-button slds-notify__close slds-icon--small">
+                                    <svg aria-hidden="true" class="slds-button__icon slds-button__icon--inverse">
+                                      <use xlink:href="/assets/icons/action-sprite/svg/symbols.svg#close"></use>
+                                    </svg>
+                                    <span class="slds-assistive-text">Close</span>
+                                  </button>
+                                  <h2>
+                                    <svg aria-hidden="true" class="slds-icon icon-text-email slds-icon--small slds-m-right--x-small">
+                                      <use xlink:href="/assets/icons/action-sprite/svg/symbols.svg#email"></use>
+                                    </svg>Preference Saved Successfully</h2>
+                                </div>
+                                <br/>
+                            </div>
+                            <div id='notificationPrefsSaveSuccess' class="slds-hide">
+                                <div class="slds-notify slds-notify--alert slds-box slds-theme--error slds-theme--inverse-text" role="alert">
+                                    <span class="slds-assistive-text">Info</span>
+                                    <button class="slds-button slds-notify__close slds-icon--small">
+                                        <svg aria-hidden="true" class="slds-button__icon slds-button__icon--inverse">
+                                            <use xlink:href="/assets/icons/action-sprite/svg/symbols.svg#close"></use>
+                                        </svg>
+                                        <span class="slds-assistive-text">Close</span>
+                                    </button>
+                                    <h2><svg aria-hidden="true" class="slds-icon icon-text-email slds-icon--small slds-m-right--x-small">
+                                      <use xlink:href="/assets/icons/action-sprite/svg/symbols.svg#email"></use>
+                                    </svg>An Error Occured Attempting to Save the Preference</h2>
+                                </div>
+                                <br/>
+                            </div>
+                            <button class="slds-button slds-button--brand" type="button" ng-click="admin.savePrefs()" ng-disabled="!checkboxModel.standardValue && !checkboxModel.customValue">Save Preference</button>
+                        </section>
+                    </div>
+                </section>
+            </div>
+            <div class="slds-tabs__content slds-hide" role="tabpanel" id="tabContentStep3">
+                <section aria-labelledby="tabStep3" class="slds-p-around--large">
+                    <div class="slds-card slds-theme--default" ng-show="checkboxModel.standardValue">
+                        <header class="slds-card__header slds-grid grid--flex-spread">
+                            <h3 class="slds-text-heading--small">Permission Set</h3>
+                        </header>
+                        <section class="slds-card__body slds-p-around--small">
+                            <p class="slds-text-body--medium">
+                                Add the Augment User Permission Set to any Users that will be using the Augment for Salesforce App.
+                            </p>
+                        </section>
+                        <header class="slds-card__header slds-grid grid--flex-spread">
+                            <h3 class="slds-text-heading--small">Product Detail Page Layout</h3>
+                        </header>
+                        <section class="slds-card__body slds-p-around--small">
+                            <p class="slds-text-body--medium">
+                                Add the <em>'Select 3d Model'</em> button, <em>'3d Model Name'</em> field, and the <em>'3d Model Thumbnail'</em> field, to the Product Detail page layout.<br/>
+                            </p>
+                            <button class="slds-button slds-button--brand slds-m-top--large" target="_blank" onclick="if((typeof sforce != 'undefined') && (sforce != null)){location.href='/one/one.app#/setup/object/Product2';}else{location.href='/ui/setup/Setup?setupid=Products';} return false;">
+                                <svg aria-hidden="true" class="slds-icon slds-icon--x-small">
+                                    <use xlink:href="{!URLFOR($Resource.SLDS080, 'SLDS080/assets/icons/utility-sprite/svg/symbols.svg#new_window')}"></use>
+                                </svg>
+                                Open Page Layout
+                            </button>
+                        </section>
+                        <header class="slds-card__header slds-grid grid--flex-spread">
+                            <h3 class="slds-text-heading--small">Opportunity Product Page Layout</h3>
+                        </header>
+                        <section class="slds-card__body slds-p-around--small">
+                            <p class="slds-text-body--medium">
+                                Add SelectModelsPage visualforce page to the mobile cards section on the Opportunity page layout. Next, set the height of the mobile card by selecting the properties (wrench) and changing the height from <em>200</em> to <em>60</em>.
+                            </p>
+                            <button class="slds-button slds-button--brand slds-m-top--large" target="_blank" onclick="if((typeof sforce != 'undefined') && (sforce != null)){location.href='/one/one.app#/setup/object/Opportunity';}else{location.href='/ui/setup/Setup?setupid=Opportunity';} return false;">
+                                <svg aria-hidden="true" class="slds-icon slds-icon--x-small">
+                                    <use xlink:href="{!URLFOR($Resource.SLDS080, 'SLDS080/assets/icons/utility-sprite/svg/symbols.svg#new_window')}"></use>
+                                </svg>
+                                Open Page Layout
+                            </button>
+                        </section>
+                        <header class="slds-card__header slds-grid grid--flex-spread">
+                            <h3 class="slds-text-heading--small">Chatter Feed</h3>
+                        </header>
+                        <section class="slds-card__body slds-p-around--small">
+                            <p class="slds-text-body--medium">
+                                Add Chatter>Feed Tracking to your Opportunity Line Item.
+                            </p>
+                        </section>
+                    </div>
+                    <div class="slds-card slds-theme--default" ng-show="checkboxModel.customValue">
+                        <header class="slds-card__header slds-grid grid--flex-spread">
+                            <h3 class="slds-text-heading--small">Custom Product Object</h3>
+                        </header>
+                        <section class="slds-card__body slds-p-around--small">
+                            <p class="slds-text-body--medium">
+                                Select the object you would like to map your Augment 3d Models to:
+                            </p>
+                            <apex:form id="myform">
+                                <div class="slds-form-element">
+                                    <div class="slds-form-element__control">
+                                        <apex:selectList id="myobject" value="{!customMap.objectAPI}" size="1" styleClass="slds-select" onChange="doSomething(this.value);">
+                                            <apex:selectOptions value="{!ProductObjects}"/>
+                                        </apex:selectList>
+                                    </div>
+                            </div>
+                            </apex:form>
+                            <button id="selectObjButton" class="slds-button slds-button--brand slds-m-top--large" type="button" disabled="true" ng-enter="admin.showModal()" ng-click="admin.showModal()">Select Object</button><br/><br/>
+                            <div ng-show="admin.custObjSaved.status == true">
+                                <div class="slds-notify slds-notify--alert slds-theme--alert-texture slds-theme--success" role="alert">
+                                  <span class="slds-assistive-text">Info</span>
+                                  <button class="slds-button slds-notify__close slds-icon--small">
+                                    <svg aria-hidden="true" class="slds-button__icon slds-button__icon--inverse">
+                                      <use xlink:href="/assets/icons/action-sprite/svg/symbols.svg#close"></use>
+                                    </svg>
+                                    <span class="slds-assistive-text">Close</span>
+                                  </button>
+                                  <h2>
+                                    <svg aria-hidden="true" class="slds-icon icon-text-email slds-icon--small slds-m-right--x-small">
+                                      <use xlink:href="/assets/icons/action-sprite/svg/symbols.svg#email"></use>
+                                    </svg>Object Selected Successfully</h2>
+                                </div>
+                                <br/>
+                            </div>
+                            <div ng-show="admin.custObjError.status == true">
+                                <div class="slds-notify slds-notify--alert slds-box slds-theme--error slds-theme--inverse-text" role="alert">
+                                    <span class="slds-assistive-text">Info</span>
+                                    <button class="slds-button slds-notify__close slds-icon--small">
+                                        <svg aria-hidden="true" class="slds-button__icon slds-button__icon--inverse">
+                                            <use xlink:href="/assets/icons/action-sprite/svg/symbols.svg#close"></use>
+                                        </svg>
+                                        <span class="slds-assistive-text">Close</span>
+                                    </button>
+                                    <h2><svg aria-hidden="true" class="slds-icon icon-text-email slds-icon--small slds-m-right--x-small">
+                                      <use xlink:href="/assets/icons/action-sprite/svg/symbols.svg#email"></use>
+                                    </svg><span id="selectObjErrorMsg">An Error Occured Attempting to Select the Object</span></h2>
+                                </div>
+                                <br/>
+                            </div>
+                            <button class="slds-button" ng-click="admin.toggleCreatedComponents();">
+                                Click Here for a list of Components that have been created
+                            </button>
+                            <div class="instructions" ng-show="admin.helpCreatedComponents.value">
+                                <ol class="slds-theme--shade">
+                                    <div ng-repeat="comp in admin.componentList">
+                                        <li>{{comp[0]}} - {{comp[1]}}</li>
+                                    </div>
+                                </ol>
+                            </div><br/>
+                            <p class="slds-text-body--medium">
+                                Add the <em>'Select 3d Model'</em> button, <em>'3d Model Name'</em> field, and the <em>'3d Model Thumbnail'</em> field, to the Detail page layout.<br/>
+                                Add AGMT2&lt;yourmodel&gt;CustomPage visualforce page to the mobile cards section on the page layout. Next, set the height of the mobile card by selecting the properties (wrench) and changing the height from <em>200</em> to <em>60</em>.
+                            </p>
+                            <button id="genButton" class="slds-button slds-button--brand slds-m-top--large" target="_blank" disabled="true" onclick="location.href=document.getElementById('genButton').href; return false;">
+                                <svg aria-hidden="true" class="slds-icon slds-icon--x-small">
+                                    <use xlink:href="{!URLFOR($Resource.SLDS080, 'SLDS080/assets/icons/utility-sprite/svg/symbols.svg#new_window')}"></use>
+                                </svg>
+                                Open Page Layout
+                            </button>
+                        </section>
+                        <header class="slds-card__header slds-grid grid--flex-spread">
+                            <h3 class="slds-text-heading--small">Permission Set</h3>
+                        </header>
+                        <section class="slds-card__body slds-p-around--small">
+                            <p class="slds-text-body--medium">
+                                Add the Augment User Permission Set to any Users that will be using the Augment for Salesforce App.
+                            </p>
+                            <p class="slds-text-body--medium">
+                                Add the Augment User Custom Permission Set to any Users that will be using the Augment for Salesforce App.
+                            </p>
+                        </section>
+                        <header class="slds-card__header slds-grid grid--flex-spread">
+                            <h3 class="slds-text-heading--small">Chatter Feed</h3>
+                        </header>
+                        <section class="slds-card__body slds-p-around--small">
+                            <p class="slds-text-body--medium">
+                                Add Chatter>Feed Tracking to your Custom Object.
+                            </p>
+                        </section>
+                    </div>
+                    <div class="slds-card slds-theme--default" ng-show="!checkboxModel.standardValue && !checkboxModel.customValue">
+                        <header class="slds-card__header slds-grid grid--flex-spread">
+                            <h3 class="slds-text-heading--small">Plan Required</h3>
+                        </header>
+                        <section class="slds-card__body slds-p-around--small">
+                            <p class="slds-text-body--medium">
+                                Please return to the  <em>'2: Plan'</em> step and select the type of Objects you would like to map 3d models to.
+                            </p>
+                        </section>
+                    </div>
+                </section>
+            </div>
+            <div class="slds-tabs__content slds-hide" role="tabpanel" id="tabContentStep4">
+                <section aria-labelledby="tabStep4" class="slds-p-around--large">
+                    <div class="slds-card slds-theme--default" ng-show="checkboxModel.standardValue || checkboxModel.customValue">
+                        <header class="slds-card__header slds-grid grid--flex-spread">
+                            <h3 class="slds-text-heading--small">Model Setup</h3>
+                        </header>
+                        <section class="slds-card__body slds-p-around--small">
+                            <p class="slds-text-body--medium" ng-show="checkboxModel.standardValue">
+                                Configure/Map models to your products by clicking the <em>'Select 3d Model'</em> button after adding to the product detail page.
+                            </p>
+                            <p class="slds-text-body--medium" ng-show="checkboxModel.customValue">
+                                Map your products by clicking the <em>'Select 3d Model'</em> button your custom object’s detail page.
+                            </p>
+                            <span class="slds-button">
+                                Instructions to launch augment via Salesforce1 on your iOS or Android Device:
+                            </span>
+                            <div class="instructions">
+                                <ol class="slds-theme--shade">
+                                    <li ng-show="checkboxModel.standardValue"> 1.  Once logged into Salesforce1, go to an Opportunity that has Product(s) with models.</li>
+                                    <li ng-show="checkboxModel.customValue"> 1.  Once logged into Salesforce1, go to your Custom object with models.</li>
+                                    <li> 2.  Select the “Related” list.</li>
+                                    <li> 3.  Select “Products with Models”.</li>
+                                    <li> 4.  Select the image of the model to launch.</li>
+                                    <li> 5.  Augment will launch with selected model.</li>
+                                    <li> 6.  Orient the model in the live view through Augment.</li>
+                                    <li> 7.  Select the camera icon to take a picture.</li>
+                                    <li> 8.  Save the pic as an image to the device.</li>
+                                    <li> 9.  Close the Augment app by selecting the “x”.</li> 
+                                    <li> 10. Once routed back to the Opportunity in SF1, select the file icon at the bottom of the page.</li>
+                                    <li> 11. Select the desired image from the Camera Roll.</li>
+                                    <li> 12. Select “Submit”.</li> 
+                                    <li> 13. The image can now be viewed in the Feed.</li>
+                                </ol>
+                            </div>
+                        </section>
+                    </div>
+                    <div class="slds-card slds-theme--default" ng-show="!checkboxModel.standardValue && !checkboxModel.customValue">
+                        <header class="slds-card__header slds-grid grid--flex-spread">
+                            <h3 class="slds-text-heading--small">Plan Required</h3>
+                        </header>
+                        <section class="slds-card__body slds-p-around--small">
+                            <p class="slds-text-body--medium">
+                                Please return to the  <em>'2: Plan'</em> step and select the type of Objects you would like to map 3d models to.
+                            </p>
+                        </section>
+                    </div>
+                </section>
+            </div>
+            <div id="openModal" style="display:none;">
+                <div aria-hidden="false" role="dialog" class="slds-modal slds-fade-in-open">
+                    <div class="slds-modal__container">
+                        <div class="slds-modal__header">
+                            <h2 class="slds-text-heading--medium">Confirm Selection</h2>
+                            <button class="slds-button slds-modal__close">
+                                <svg aria-hidden="true" class="slds-button__icon slds-button__icon--inverse slds-button__icon--large">
+                                    <use xlink:href="/assets/icons/action-sprite/svg/symbols.svg#close"></use>
+                                </svg>
+                                <span class="slds-assistive-text">Close</span>
+                            </button>
+                        </div>
+                        <div class="slds-modal__content">
+                            <div>
+                                <p>This action will create the following components outside the Managed Package:</p><br/>
+                                <ol class="slds-theme--shade">
+                                    <li>Remote Site Setting</li>
+                                    <li>2 Visualforce Pages</li>
+                                    <li>2 Apex Controller Classes</li>
+                                    <li>2 Apex Test Classes</li>
+                                    <li>4 Custom Fields</li>
+                                    <li>1 Custom Button</li>
+                                </ol><br/>
+                                <p>Click OK to continue.</p>
+                            </div>
+                        </div>
+                        <div class="slds-modal__footer">
+                            <button id="genAssetOk" class="slds-button slds-button--neutral slds-button--brand" ng-enter="admin.generateAssets()" ng-click="admin.generateAssets()" ng-class="{'slds-hide' : admin.generatingAssets==true}">Ok</button>
+                            <button class="slds-button slds-button--neutral" ng-click="admin.cancelModal()" ng-class="{'slds-hide' : admin.generatingAssets==true}">Cancel</button>
+                            <div id="genAssetSpinner" class="slds-spinner--small" ng-class="{'slds-hide' : admin.generatingAssets==false, 'slds-show' : admin.generatingAssets==true}">
+                                <img src="{!URLFOR($Resource.SLDS080, 'SLDS080/assets/images/spinners/slds_spinner.gif')}" alt="Loading..." />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="slds-modal-backdrop slds-modal-backdrop--open"></div>
+            </div>
+        </div>
+    </div>
+</body>
+     <apex:includeScript value="https://code.jquery.com/jquery-2.1.4.min.js"/>
+    <script>
+    var app = app || {
+        utils: {},
+        ui: {}
+    };
+    app.ui.switchTab = function(tabName){
+        // Switch Tab Context
+        var tabSelected = $('#tab'+tabName);
+        $('.slds-tabs__item').removeClass('slds-active');
+        tabSelected.addClass('slds-active');
+        
+        // Switch Tab Content
+        var tabSelectedContent = $('#tabContent'+tabName);
+        var tabHeaderButtons = $('.tabButtons' + tabName);
+        $('.slds-tabs__content').removeClass('slds-show');
+        $('.slds-tabs__content').addClass('slds-hide');
+        tabSelectedContent.addClass('slds-show');
+        // added the ability to show per tab action buttons
+        tabHeaderButtons.toggleClass('slds-show');
+        
+        // note: slds-float-right has conflict with hide and show, visual impact
+        // so, to hide the button parent div (button group) so space collapses when not being shown
+        $('button.slds-hide').parent().css('margin-left', '0');
+        // making sure we don't take away the left margin to separate button groups
+        $('button.slds-hide.slds-show').parent().css('margin-left', '4px');
+        app.ui.closeNotification('PrefsSaveSuccess');
+        app.ui.closeNotification('PrefsSaveError');
+
+        //Check Remote Site Setting and add if necessary
+        if(tabName == 'Step3' && metadataConnectionWarning == 'true'){
+            createRemoteSite();
+        }
+        //
+    };
+    // created to simulate the edit mode of the Lists tab
+    app.ui.modeEdit = function() {
+        if ($('#btnEdit').html('Edit')) {
+          $('#btnEdit').html('Save');
+        } else if ($('#btnEdit').html('Save')) {
+          $('#btnEdit').html('Edit');
+        }
+        
+       // $('.tabButtonsList').addClass('slds-hide');
+        $('#tabContentLists .mode-edit').toggleClass('slds-show');
+        $('#tabContentLists .mode-read-only').toggleClass('slds-hide');
+    };
+    app.ui.closeNotification = function(notificationName){
+        $('#notification'+notificationName).removeClass('slds-show');
+        $('#notification'+notificationName).addClass('slds-hide');
+    };
+    app.ui.openNotification = function(notificationName){
+        $('#notification'+notificationName).removeClass('slds-hide');
+        $('#notification'+notificationName).addClass('slds-show');
+    };
+    app.updateCredentials = function(){
+        $('#updateCredentialsButton').hide();
+        $('#updateCredentialsLoading').show();
+        setTimeout(function(){ 
+            app.ui.openNotification('CredentialSuccess');
+            $('#updateCredentialsLoading').hide();
+            $('#updateCredentialsButton').show();
+        }, 2000);
+        return false;
+    };
+    </script>
+</html>
+
+</apex:page>

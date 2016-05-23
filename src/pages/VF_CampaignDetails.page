@@ -1,0 +1,55 @@
+<apex:page Controller="CampaignDetailsController" readOnly="true">
+<apex:form >
+	<head>
+		<apex:includescript value="//code.jquery.com/jquery-1.11.1.min.js" / >
+		<apex:includescript value="//cdn.datatables.net/1.10.4/js/jquery.dataTables.min.js" />
+		<apex:stylesheet value="//cdn.datatables.net/1.10.4/css/jquery.dataTables.css" />
+		<script>
+			j$ = jQuery.noConflict();
+			j$(document).ready( function () {
+				var contactTable = j$('[id$="contacttable"]').DataTable({
+					
+				});
+			});
+			function myJavascriptFunc()
+    		{
+        		alert('Entered Javascript') ;
+        		CallApexMethod() ;
+        		//sforce.apex.execute("CampaignDetailsController", "myActionInController",{}); 
+    		}
+		</script>
+	</head>
+	<body>
+	 <apex:selectList id="chooseView" value="{!ViewString}" size="1">
+            <apex:selectOption itemValue="Recently Modified" itemLabel="Recently Modified"/>
+            <apex:selectOption itemValue="All Campaigns" itemLabel="All Campaigns"/>
+            <apex:selectOption itemValue="All Active Campaigns" itemLabel="All Active Campaigns"/>
+            <apex:selectOption itemValue="My Active Campaigns" itemLabel="My Active Campaigns"/>
+            <apex:selectOption itemValue="Inactive Campaigns" itemLabel="Inactive Campaigns"/>
+        </apex:selectList> 
+    <apex:commandButton action="{!myActionInController}" value="GO" id="theButton">
+    	<apex:param name="s" value="{!ViewString}" assignTo="{!s}"/>
+    </apex:commandButton>
+		<table id="contacttable" class="display">
+			<thead>
+				<tr>
+					<th>Campaign Name</th>
+					<th>Status</th>
+					<th>Type</th>
+					<th>Start Date</th>
+				</tr>
+			</thead>
+			<tbody>
+				<apex:repeat value="{!campaignList}" var="campaign">
+					<tr>
+						<td><a href='https://c.ap2.visual.force.com/apex/VF_Campaign_Details?Id={!campaign.Id}'>{!campaign.Campaign_Name__c}</a></td>
+						<td>{!campaign.Status__c}</td>
+						<td>{!campaign.Type__c}</td>
+						<td>{!campaign.Start_Date__c}</td>
+					</tr>
+				</apex:repeat>
+			</tbody>
+		</table>
+	</body>
+	</apex:form>
+</apex:page>

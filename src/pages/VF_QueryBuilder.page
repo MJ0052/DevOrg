@@ -1,0 +1,91 @@
+<apex:page controller="QueryBuilderController" sidebar="false" showHeader="false">
+<head>
+	<apex:includeScript value="https://code.jquery.com/jquery-2.2.1.min.js"></apex:includeScript>
+	<apex:includeScript value="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></apex:includeScript>
+	<apex:stylesheet value="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"/>
+<style>
+	.multipleList{
+	    height: 150px !important;
+    	max-height: 150px !important;
+	}
+	.queryArea
+	{
+	width:90%;
+	height: 65px;
+    resize: none;
+	}
+	.multipleListLeft{
+	    height: 150px !important;
+    	max-height: 150px !important;
+    	margin-left: 12px;
+	}
+</style>
+</head>
+<apex:form >
+	<apex:pageBlock >
+		<center>
+		<h2>Query Builder</h2>
+		</center>
+		<br/>
+		<apex:pageMessages />
+		<br/>
+		<apex:pageBlockSection columns="2">
+		<apex:selectList id="customObjects" styleclass="" size="1" value="{!selectedObject}" label="Object">
+			<apex:selectOptions value="{!ObjectList}"/>
+ 			<apex:actionSupport event="onchange" action="{!RetrieveSelectedObjectFields}" />
+		</apex:selectList>
+		</apex:pageBlockSection>
+		<table style="width:100%;">
+		<tr>
+		<td style="width:18%;">
+		<label style="float:right;padding-right: 8px;" >Fields</label>
+		</td>
+		<td style="width: 13%;">
+		<apex:selectList id="customObjectFields" styleclass="" multiselect="true" value="{!selectedFields}"  label="Fields" styleClass="multipleListLeft">
+			<apex:selectOptions value="{!FieldList}"/>
+		</apex:selectList>
+		</td>
+		<td style="width:3%;">
+		<apex:commandButton value=">>" action="{!AddTo}" ></apex:commandButton>
+		<apex:commandButton value="<<" action="{!RemoveFrom}" ></apex:commandButton>
+		</td>
+		<td>
+		<apex:selectList id="customObjectFieldSelected" styleclass="" multiselect="true" value="{!selectedFieldsRight}"  label="Selected Fields" styleClass="multipleList">
+			<apex:selectOptions value="{!FieldListRight}"/>
+		</apex:selectList>
+		</td>
+		</tr>
+		</table>
+		<apex:pageBlockSection columns="2" rendered="{!NOT(ISNULL(FieldList))}">
+		<apex:selectList id="customObjectFieldForOrder" size="1" styleclass="" value="{!selectedFieldForOrder}" label="Order By">
+			<apex:selectOptions value="{!FieldList}"/>
+			<apex:actionSupport event="onchange" action="{!RetrieveQuery}" />
+		</apex:selectList> 
+		<apex:selectRadio value="{!selectedOrder}">
+            <apex:selectOptions value="{!order}"/>&nbsp;&nbsp;
+            <apex:actionSupport event="onchange" action="{!RetrieveQuery}" />
+        </apex:selectRadio>
+        <apex:selectList id="recordsToDisplay" styleclass="" size="1" value="{!selectedRecordsToDisplay}"  label="Number of Records">
+			<apex:selectOptions value="{!numberOfRecordsList}"/>
+			<apex:actionSupport event="onchange" action="{!RetrieveQuery}" />
+		</apex:selectList>
+        </apex:pageBlockSection>
+		<apex:pageBlockSection columns="1">
+		<!-- 		rendered="{!NOT(ISNULL(GeneratedQuery))}" JINA MAM-->
+			<apex:inputTextarea id="generatedQuery" value="{!generatedQuery}" rendered="{!NOT(ISNULL(FieldList))}" styleClass="queryArea" label="Query"/>
+		</apex:pageBlockSection>
+		<center>
+<!-- 		<apex:commandButton value="Show Query" action="{!ShowGeneratedQuery}" rendered="{!NOT(ISNULL(FieldList))}"></apex:commandButton>&nbsp;&nbsp; -->
+		<apex:commandButton value="Execute Query" action="{!QueryResult}" rendered="{!NOT(ISNULL(FieldList))}"></apex:commandButton>
+		</center>
+		<apex:pageBlockSection columns="1"  rendered="{!NOT(ISNULL(SObjectList))}">
+		 <apex:pageBlockTable value="{!SObjectList}" var="rec">  
+         	<apex:column value="{!rec.Id}"/>  
+            <apex:repeat value="{!SelectedFields}" var="FieldLable">  
+            	<apex:column value="{!rec[FieldLable]}" rendered="{!IF(FieldLable != '--None--' , true, false)}"/>  
+            </apex:repeat>  
+         </apex:pageBlockTable>  
+         </apex:pageBlockSection>
+	</apex:pageBlock>
+</apex:form>
+</apex:page>

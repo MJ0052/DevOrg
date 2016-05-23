@@ -1,0 +1,70 @@
+<apex:page standardController="Project__c" extensions="ProjectInvoiceExtension">
+<style type="text/css">
+   .outBorder {
+    border:1px solid gray;
+   }
+   .inBorder{
+   	border:1px solid gray;
+   }
+   .dTable{
+   width:100%;
+   }
+   .odd{
+   	background-color: lightblue;
+   }
+  </style>
+  <script>
+	function checkAll(cb)
+	{
+		var inputElem = document.getElementsByTagName("input");
+		for(var i=0; i<inputElem.length; i++)
+		{
+			if(inputElem[i].id.indexOf("checkedone")!=-1)
+			inputElem[i].checked = cb.checked;
+		}
+	}   
+</script>
+  
+<apex:form >
+        <apex:pageBlock title="New Invoice">
+            <apex:pageBlockSection columns="3">	
+            	<apex:outputField value="{!Project__c.Name}" label="Project"/>
+          		<apex:inputField value="{!Project__c.Start_Date__c}" label="From"/>    
+          		<apex:inputField value="{!Project__c.End_Date__c}" label="To"/>
+          		<apex:commandButton action="{!searchProjectTimeEntries}" value="Search" id="searchButton"/>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection columns="1">	
+            <!--	<apex:pageBlockTable value="{!projects}" var="item">
+            		<apex:column value="{!item.name}"/>
+        		</apex:pageBlockTable>  -->
+            
+            	<apex:dataTable value="{!timeEntriesList}" var="timeEntries" id="theTable" rowClasses="odd,even" cellspacing="3" cellpadding="3" styleClass="outBorder dTable">
+            		<apex:column >
+						<apex:facet name="header"> 
+							<apex:inputCheckbox >
+								<apex:actionSupport event="onclick" action="{!GetSelected}" onsubmit="checkAll(this)" rerender="Selected_PBS"/>
+							</apex:inputCheckbox>
+						</apex:facet>
+						 <apex:inputCheckbox value="{!timeEntries.Selected__c}" id="checkedone">
+							<apex:actionSupport event="onclick" action="{!GetSelected}" rerender="Selected_PBS"/>
+						</apex:inputCheckbox>
+					</apex:column>
+					<apex:column styleclass="inBorder">
+		        		<apex:facet name="header">Name</apex:facet>
+						<apex:outputText value="{!timeEntries.name}"/>
+					</apex:column>
+					<apex:column styleclass="inBorder">
+						<apex:facet name="header">Owner</apex:facet>
+						<apex:outputText value="{!timeEntries.name}"/>
+					</apex:column>
+				</apex:dataTable>
+			</apex:pageBlockSection>
+			<apex:pageBlockSection columns="3">	
+            	<apex:commandButton action="{!generateInvoice}" value="Generate Invoice" id="generateInvoiceButton"/>
+            	<apex:commandButton value="Cancel" onclick="this.form.reset();return false;" />
+            </apex:pageBlockSection>
+            <apex:pageBlockButtons >
+            </apex:pageBlockButtons>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

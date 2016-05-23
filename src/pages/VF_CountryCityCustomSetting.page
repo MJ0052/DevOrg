@@ -1,0 +1,37 @@
+<apex:page controller="CountryCityCustomSettingController" showHeader="false" sidebar="false">
+<head>
+	<apex:includeScript value="https://code.jquery.com/jquery-2.2.1.min.js"></apex:includeScript>
+	<apex:includeScript value="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></apex:includeScript>
+	<apex:stylesheet value="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"/>
+	<style>
+	body{
+	    background:url(http://thekitemap.com/images/feedback-img.jpg) no-repeat;
+  		background-size: cover;
+  		height:100%;
+	}
+	</style>
+</head>
+   <apex:form style="width:400px; text-align:center; margin:auto;">
+   <apex:actionFunction name="rerenderCities" rerender="citiesSelectList" >
+   	<apex:param name="firstParam" assignTo="{!country}" value="" />
+   </apex:actionFunction>
+	<apex:pageBlock >
+		<h3>Custom Settings Implementation</h3>
+		<br/>
+        <apex:pageMessages />
+        <br/>
+        <br/>
+        <br/>
+        <apex:pageBlockSection columns="2">
+        <label>Country</label>
+       	<apex:selectList id="country" styleclass="std" size="1" value="{!country}" onChange="rerenderCities(this.value)">
+		<apex:selectOptions value="{!countriesSelectList}"/>
+		</apex:selectList>
+	   	<label>City</label>
+      	<apex:selectList id="citiesSelectList" styleclass="std" size="1" value="{!city}">
+		<apex:selectOptions value="{!CitiesSelectList}"/>
+		</apex:selectList>
+        </apex:pageBlockSection>
+        </apex:pageBlock>
+   </apex:form>
+</apex:page>

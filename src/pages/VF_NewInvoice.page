@@ -1,0 +1,98 @@
+<apex:page standardController="Invoice__c" extensions="InvoiceExtension">
+	<apex:includescript value="//code.jquery.com/jquery-1.11.1.min.js"/ >
+		<script>
+	$j = jQuery.noConflict();
+	$j(document).ready(function() {
+	debugger;
+	if($j(".outBorder").find("tbody").children().length > 0){
+		$j(".outBorder").show()
+	}
+	else{
+	$j(".outBorder").hide()
+	}
+	alert(some);
+	});
+</script>
+		<style type="text/css">
+.outBorder {
+	border: 1px solid gray;
+}
+
+.inBorder {
+	border: 1px solid gray;
+}
+
+.dTable {
+	width: 100%;
+}
+
+.odd {
+	background-color: lightblue;
+}
+</style>
+		<script>
+	function checkAll(cb)
+	{
+		var inputElem = document.getElementsByTagName("input");
+		for(var i=0; i<inputElem.length; i++)
+		{
+			if(inputElem[i].id.indexOf("checkedone")!=-1)
+			inputElem[i].checked = cb.checked;
+		}
+	}   
+</script>
+
+		<apex:form >
+			<apex:pageBlock title="New Invoice">
+				<apex:pageBlockSection columns="3">
+					<apex:inputField value="{!Invoice__c.Account__c}" label="Client" />
+					<apex:inputField value="{!Invoice__c.Invoice_Start_Date__c}"
+						label="From" />
+					<apex:inputField value="{!Invoice__c.Invoice_End_Date__c}"
+						label="To" />
+					<apex:commandButton action="{!searchClientProjects}" value="Search"
+						id="searchButton" />
+				</apex:pageBlockSection>
+				<apex:pageBlockSection columns="1">
+					<!--	<apex:pageBlockTable value="{!projects}" var="item">
+            		<apex:column value="{!item.name}"/>
+        		</apex:pageBlockTable>  -->
+					<div id="dataTableDiv">
+						<apex:dataTable value="{!projects}" var="project" id="theTable"
+							rowClasses="odd,even" cellspacing="3" cellpadding="3"
+							styleClass="outBorder dTable" rendered="{!(projects.size != 0)}">
+							<apex:column >
+								<apex:facet name="header">
+									<apex:inputCheckbox >
+										<apex:actionSupport event="onclick" action="{!GetSelected}"
+											onsubmit="checkAll(this)" rerender="Selected_PBS" />
+									</apex:inputCheckbox>
+								</apex:facet>
+								<apex:inputCheckbox value="{!project.Selected__c}"
+									id="checkedone">
+									<apex:actionSupport event="onclick" action="{!GetSelected}"
+										rerender="Selected_PBS" />
+								</apex:inputCheckbox>
+							</apex:column>
+							<apex:column styleclass="inBorder">
+								<apex:facet name="header">Name</apex:facet>
+								<apex:outputText value="{!project.name}" />
+							</apex:column>
+							<apex:column styleclass="inBorder">
+								<apex:facet name="header">Owner</apex:facet>
+								<apex:outputText value="{!project.name}" />
+							</apex:column>
+						</apex:dataTable>
+					</div>
+				</apex:pageBlockSection>
+				<apex:pageBlockSection columns="3">
+					<apex:commandButton action="{!generateInvoice}"
+						value="Generate Invoice" id="generateInvoiceButton" />
+					<apex:commandButton value="Cancel"
+						onclick="this.form.reset();return false;" />
+				</apex:pageBlockSection>
+				<apex:pageBlockButtons >
+				</apex:pageBlockButtons>
+			</apex:pageBlock>
+		</apex:form>
+</apex:page>

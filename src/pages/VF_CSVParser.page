@@ -1,0 +1,46 @@
+<apex:page sidebar="false" controller="CSVParserController" showHeader="false">
+   <apex:form >
+      <apex:sectionHeader title="CSV Parser for Universal Container"/>
+      <apex:pagemessages />
+      <apex:pageBlock >
+      	<center>
+	        <apex:inputFile value="{!contentFile}" filename="{!fileName}" /> <apex:commandButton action="{!ReadFile}" value="Upload File" id="theButton"/>
+        </center>    
+      <apex:pageblocktable value="{!UploadedData}" var="acc" rendered="{!NOT(ISNULL(UploadedData))}">
+          <apex:column headerValue="Account Name">
+              <apex:outputField value="{!acc.Name}"/>
+          </apex:column>
+          <apex:column headerValue="Shipping Street">
+              <apex:outputField value="{!acc.ShippingStreet}"/>
+          </apex:column>
+          <apex:column headerValue="Shipping City">
+              <apex:outputField value="{!acc.ShippingCity}"/>
+          </apex:column>
+          <apex:column headerValue="Shipping State">
+              <apex:outputField value="{!acc.ShippingState}"/>
+          </apex:column>
+          <apex:column headerValue="Shipping Postal Code">
+              <apex:outputField value="{!acc.ShippingPostalCode}"/>
+          </apex:column>
+          <apex:column headerValue="Shipping Country">
+              <apex:outputField value="{!acc.ShippingCountry}"/>
+          </apex:column>
+      </apex:pageblocktable> 
+      
+        <apex:pageblocktable value="{!UploadedData1}" var="acc" rendered="{!NOT(ISNULL(UploadedData1))}">
+          <apex:column headerValue="Account Name">
+              <apex:outputField value="{!acc.Campaign_Name__c}"/>
+          </apex:column>
+          <apex:column headerValue="Shipping Street">
+              <apex:outputField value="{!acc.Category__c}"/>
+          </apex:column>
+          <apex:column headerValue="Shipping City">
+              <apex:outputField value="{!acc.Description__c}"/>
+          </apex:column>
+          <apex:column headerValue="Shipping State">
+              <apex:outputField value="{!acc.Type__c}"/>
+          </apex:column>
+      </apex:pageblocktable>
+      </apex:pageBlock>       
+   </apex:form>   
+</apex:page>

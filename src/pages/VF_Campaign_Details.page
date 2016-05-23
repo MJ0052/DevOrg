@@ -1,0 +1,41 @@
+<apex:page standardController="Campaign_Management__c" extensions="CampaignManagementExtension">
+<head>
+	<apex:includeScript value="https://code.jquery.com/jquery-2.2.1.min.js"></apex:includeScript>
+	<apex:includeScript value="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></apex:includeScript>
+	<apex:stylesheet value="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"/>
+</head>
+<apex:form >
+        <apex:pageBlock title="Campaign Details">
+            <apex:pageBlockSection columns="2">	
+            	<apex:outputField value="{!Campaign_Management__c.OwnerId}"/>
+            	<apex:outputField value="{!Campaign_Management__c.Category__c}"/>	
+                <apex:outputField value="{!Campaign_Management__c.Campaign_Name__c}"/>
+                <apex:outputField value="{!Campaign_Management__c.Type__c}"/>
+                <apex:outputField value="{!Campaign_Management__c.Start_Date__c}"/>
+				<apex:outputField value="{!Campaign_Management__c.Num_Sent__c}"/>
+                <apex:outputField value="{!Campaign_Management__c.End_Date__c}"/>
+                <apex:outputField value="{!Campaign_Management__c.Parent_Campaign__c}"/>
+                <apex:outputField value="{!Campaign_Management__c.CreatedById}"/>
+				<apex:outputField value="{!Campaign_Management__c.Status__c}"/>
+                <apex:outputField value="{!Campaign_Management__c.CreatedDate}"/>
+                <apex:outputField value="{!Campaign_Management__c.Name}"/>
+				<apex:outputField value="{!Campaign_Management__c.Description__c}"/>                
+            </apex:pageBlockSection>
+            <apex:pageBlockButtons >
+                <apex:commandButton action="{!save}" value="Save"/>&nbsp;
+                <apex:outputLink value="https://ap2.salesforce.com/a0X2800000130H5/e?retURL=%{!Campaign_Management__c.Id}">Edit</apex:outputLink>&nbsp;&nbsp;
+                <apex:commandLink action="{!copyRecord}" value="Copy" id="theCommandLink"/>&nbsp;&nbsp;
+                <apex:commandButton action="{!softDeleteRecord}" value="Delete"/>
+                <div class="dropdown" style="float:left;">
+  					<button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+    					Action<span class="caret"></span>
+  					</button>
+  					<ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+    					<li><apex:outputLink value="https://ap2.salesforce.com/home/home.jsp">Manage Members</apex:outputLink></li>
+    					<li><apex:outputLink value="https://ap2.salesforce.com/home/home.jsp">Add Members from Mailing List</apex:outputLink></li>
+  					</ul>
+				</div>
+            </apex:pageBlockButtons>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

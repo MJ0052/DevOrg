@@ -1,0 +1,242 @@
+<apex:page docType="html-5.0" standardstylesheets="false" sidebar="false" showHeader="false" standardController="Opportunity" extensions="AGMT.OppAugmentedLineItemsController">
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+      
+        <apex:stylesheet value="{!URLFOR($Resource.AGMT__cs_assets, '/css/augment-reset.css')}"/>
+        <apex:stylesheet value="{!URLFOR($Resource.AGMT__cs_assets, '/css/augment-bootstrap-sf1.css')}" />
+
+        <style>
+
+        .augment .bootstrap-sf1 .cs-adjustment{
+
+            padding-left: 6px !important;
+            padding-top: 9px !important;
+
+        }
+
+        .augment .bootstrap-sf1 .page-header.context-augment h1:before {
+
+            height: 32px !important;
+            width: 32px !important;
+            background-color: #666666;
+            background-image: url({!URLFOR($Resource.AGMT__cs_assets, '/icons/custom/augmentIconDark.png')});
+        }
+
+        .augment .bootstrap-sf1 .image-adjustment {
+            height: 120px;
+            width: 120px;
+            margin-top: 12px;
+            margin-left: 12px;
+            margin-bottom: 12px;
+            /*margin-right: 12px;*/
+            float: left;
+        }
+
+        .augment .bootstrap-sf1 .list-box{
+            
+            margin-top: 12px;
+            margin-bottom: 12px;
+            margin-right: 12px;
+            display: -webkit-inline-box;
+        }
+
+        .augment .bootstrap-sf1 .card-adjustment{
+            list-style: none;  
+        }
+
+        .augment .bootstrap-sf1 .img {
+            max-width:120px;
+            max-height: 120px;
+            height:auto;
+            display: none;
+        }
+
+        .augment .bootstrap-sf1 .card-box{
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow-x: auto;
+           
+        }
+
+        .augment .bootstrap-sf1 .image-box{
+
+            height: 120px;
+            width: 120px;
+            background-position: center;
+            background-repeat: no-repeat;
+            -webkit-background-size: contain;
+            -moz-background-size: contain;
+            -o-background-size: contain;
+            background-size: background-size: contain;
+
+        }
+
+        .augment .bootstrap-sf1 .droid-button{
+            height: 120px;
+            width: 120px;
+        }
+
+        </style>
+        
+        <apex:includeScript value="{!URLFOR($Resource.AGMT__cs_assets, '/libs/angular.min.js')}"/>
+        <script src="https://code.angularjs.org/1.3.1/angular-touch.min.js" />
+
+        <script type="text/javascript">
+            mobileConfig = {
+                staticResource: '{!$Resource.cs_assets}',
+                remoteData: {
+                                returnOppLineItems: '{!$RemoteAction.OppAugmentedLineItemsController.returnOppLineItems}'
+                              
+                }
+                
+            };
+
+        angular.module('augmentedLineItems', ['ngTouch'])
+     //------ the controller -------
+        .controller('mainController', ['$scope', 'ReturnOppLineItems', function ($scope, ReturnOppLineItems) {
+           
+            $scope.platform = window.clientInformation.platform;
+            $scope.val = (new RegExp("Linux")).test($scope.platform);
+
+            $scope.isAugmentInstalled = {value : true};
+
+            var augmentNotFound = function(){
+
+                $scope.isAugmentInstalled.value = false;
+            };
+
+            var augmentFound = function(){
+
+                $scope.isAugmentInstalled.value = true;
+            };
+
+            ReturnOppLineItems($scope.platform,'{!Opportunity.id}').then(function(result){
+               
+                $scope.main.items = result;
+               
+            });
+
+            var baseUrl = "{!LEFT($CurrentPage.URL,FIND('/',$CurrentPage.URL,9))}",
+            placeholderThumbnail = "{!$Resource.placeholder_thumbnail}";
+            
+            baseUrl = baseUrl.substring(0,(baseUrl.length-1));
+
+            this.defaultThumbnail = ' + baseUrl + placeholderThumbnail + ';
+
+            this.placeholderThumbnail = "{!$Resource.placeholder_thumbnail}";
+
+
+
+            $scope.openAugment = function(link){
+
+                window.setTimeout(function(){
+                    $scope.$apply(augmentNotFound);
+                    window.setTimeout(function(){
+                        $scope.$apply(augmentFound);
+                        sforce.one.navigateToSObject('{!Opportunity.id}','detail');  
+                    },6000);
+                    }, 500);
+                sforce.one.navigateToURL(link, true);
+                //location.href = link;
+
+            };
+
+        }])
+        //------- the factory -----------
+       .factory('ReturnOppLineItems', ['$q', '$rootScope', function ($q, $rootScope) {
+         return function(input,oppId) {
+             var deferred = $q.defer();
+             Visualforce.remoting.Manager.invokeAction(
+                 mobileConfig.remoteData.returnOppLineItems,input,oppId,
+                 function(result, event) {
+                     $rootScope.$apply(function() {
+                       if (event.status) {
+                         deferred.resolve(result);
+                       } else {
+                         deferred.reject(event);
+                       }
+                     })
+                 },
+                 { buffer: true, escape: false, timeout: 30000 }
+             );
+
+             return deferred.promise;
+         }
+        }])
+      
+        /////////---------------------------------------------------////////
+        ;///////---------------THIS IS THE END!!!!!-----------------////////
+        ////////----------------------------------------------------////////
+
+        </script>
+
+    </head>
+    <body>
+        <div class="augment">
+            <div class="bootstrap-sf1">
+                <div class="page-header page-header-compact context-augment cs-adjustment">
+                    <h1>Products with Models<span class="page-header-label">{!AvailOppLineItemCount} results </span></h1>
+                </div>
+                <div ng-app="augmentedLineItems" ng-controller="mainController as main" class="card-list context-account">
+                    <div class="card-list-heading">
+                        <h3><center ng-if="isAugmentInstalled.value" >Click the image to launch in Augment</center></h3>
+                    </div>
+                    <div ng-if="'{!AvailOppLineItemCount}' != '0'">
+                        <div ng-if="isAugmentInstalled.value" >
+                            <div ng-repeat="item in main.items" class="card" >
+                                <div class="card-box" >
+                                    <div ng-if="val" class="image-adjustment" >
+                                        <a class="droid-button" href="{{item.link}}" onclick="window.history.back();return false;"> 
+                                            <img ng-if="item.modelThumbnail !== ''" src="{{item.modelThumbnail}}" width="120"/>
+                                            <img ng-if="item.modelThumbnail === ''" src="{!URLFOR($Resource.placeholder_thumbnail)}" width="120"/> 
+                                            <!-- <div class="image-box" ng-style="{ 'background-image': 'url(' + item.modelThumbnail + ')' }" ></div> -->
+                                        </a> 
+                                    </div>
+                                    <div ng-if="!(val)" class="image-adjustment" ng-click="openAugment(item.link);">
+                                            <!-- <img src="{{item.modelThumbnail}}" width="120"/> -->               
+                                            <div class="image-box" ng-show="item.modelThumbnail !== ''" ng-style="{ 'background-image': 'url(' + item.modelThumbnail + ')' }" ></div>
+                                            <div class="image-box" ng-show="item.modelThumbnail === ''" ng-style="{ 'background-image': 'url(' + main.placeholderThumbnail + ')' }" ></div>
+                                    </div>
+                                    <div class="list-box">
+                                        <ul class="card-detail card-adjustment">
+                                            <li><strong>Product: </strong>{{item.productName}}</li>
+                                            <li><strong>Product Code: </strong>{{item.productCode}}</li>
+                                            <li><strong>List Price: </strong>${{item.listPrice}}</li>
+                                            <li><strong>Sales Price: </strong>${{item.salePrice}}</li>
+                                            <li><strong>Quantity: </strong>{{item.quantity}}</li>
+                                            <li><strong>3D Model Name: </strong>{{item.modelName}}</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div> <!-- end card -->
+                        </div>
+                        <div ng-if="!(isAugmentInstalled.value)">
+                            <div id="get-augment">
+                                <center>
+                                    <h2 translate="SHARING.GET_APP" class="ng-scope">Click on the market logo to get the free Augment app</h2>
+                                    <br />
+                                    <a href="https://itunes.apple.com/us/app/augment/id506463171?l=en&ls=1&mt=8"><img src="{!URLFOR($Resource.cs_assets, '/images/appstore.png')}" /></a>
+                                    <br />
+                                    <br />
+                                </center>
+                            </div>
+                        </div>
+                    </div>
+                    <div ng-if="'{!AvailOppLineItemCount}' == '0'">
+                        <div id="get-augment">
+                            <center>
+                                <h2 translate="SHARING.GET_APP" class="ng-scope">No models have been configured for this opportunity's products.  Please contact your administrator.</h2>
+                                <br />
+                            </center>
+                        </div>
+                    </div>
+                </div> <!-- end card list -->
+            </div>
+        </div> 
+    </body>
+</html> 
+</apex:page>

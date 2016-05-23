@@ -1,0 +1,31 @@
+<apex:page standardController="BioBriefing__c" >
+    <apex:form >
+        
+        <apex:pageBlock title="Edit BioBriefing">
+            <apex:pageBlockSection columns="2">		
+                <apex:inputField value="{!BioBriefing__c.Name__c}"/>
+                <apex:inputField value="{!BioBriefing__c.Account_Name__c}"/>
+                <apex:inputField value="{!BioBriefing__c.Department__c}"/>
+                <apex:inputField value="{!BioBriefing__c.Birth_Date__c}"/>
+                <apex:inputField value="{!BioBriefing__c.Mailing_Address__c}"/>
+                <apex:inputField value="{!BioBriefing__c.Languages__c}"/>
+                <apex:inputField value="{!BioBriefing__c.Description__c}"/>
+                <apex:inputField value="{!BioBriefing__c.Email__c}"/>
+                <apex:inputField value="{!BioBriefing__c.Fax__c}"/>
+                <apex:inputField value="{!BioBriefing__c.Home_Phone__c}"/>
+                <apex:inputField value="{!BioBriefing__c.Languages__c}"/>
+                <apex:inputField value="{!BioBriefing__c.Level__c}"/>
+                <apex:inputField value="{!BioBriefing__c.Mobile__c}"/>
+                <apex:inputField value="{!BioBriefing__c.Other_Address__c}"/>
+                <apex:inputField value="{!BioBriefing__c.Other_Phone__c}"/>
+                <apex:inputField value="{!BioBriefing__c.Phone__c}"/>
+                <apex:inputField value="{!BioBriefing__c.Mailing_Address__c}"/>   
+            </apex:pageBlockSection>
+            <apex:pageBlockButtons >
+                <apex:commandButton action="{!save}" value="Save"/>
+            </apex:pageBlockButtons>
+
+        </apex:pageBlock>
+        
+    </apex:form>
+</apex:page>

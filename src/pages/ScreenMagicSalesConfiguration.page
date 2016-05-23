@@ -1,0 +1,142 @@
+<apex:page showHeader="false" standardStylesheets="false" sidebar="false" applyHtmlTag="false" applyBodyTag="false" docType="html-5.0">    
+<html xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">    
+<head>
+  <title>Salesforce Lightning Design System Trailhead Module</title>
+  <apex:stylesheet value="{!URLFOR($Resource.SLDS102, 'assets/styles/salesforce-lightning-design-system-vf.css')}" />
+</head>    
+<body>    
+  <!-- REQUIRED SLDS WRAPPER -->
+  <div class="slds">    
+    <!-- MASTHEAD -->
+    <p class="slds-text-heading--label slds-m-bottom--small">Salesforce Lightning Design System</p>
+    <!-- / MASTHEAD -->    
+
+   <!-- PAGE HEADER -->
+	<div class="slds-page-header" role="banner">
+  	<!-- LAYOUT GRID -->
+  	<div class="slds-grid">
+    <!-- GRID COL -->
+    <div class="slds-col">
+      <!-- HEADING AREA -->
+      <p class="slds-text-heading--label">Configuration</p>
+      <h1 class="slds-text-heading--medium">Automated SMS - Sales Configuration</h1>
+      <!-- /HEADING AREA -->
+    </div>
+    
+  </div>
+  <!-- / LAYOUT GRID -->
+  
+</div>
+<!-- / PAGE HEADER -->
+   <!-- PRIMARY CONTENT WRAPPER -->
+<div class="myapp">
+    
+      <div aria-labelledby="newaccountform">
+    <!-- BOXED AREA -->
+    <fieldset class="slds-box slds-theme--default slds-container--medium">
+      <legend id="newaccountform" class="slds-text-heading--medium slds-p-vertical--medium">Add a new configuration</legend>
+          
+<div class="slds-form--stacked">
+    <div class="slds-form-element">
+     <div class="slds-form-element__control">
+        <label class="slds-checkbox" for="opportunities-ownership">
+          <input name="default" type="checkbox" id="opportunities-ownership" />
+          <span class="slds-checkbox--faux"></span>
+          <span class="slds-form-element__label">Send Appointment Confirmation with following template</span>
+        </label>
+      </div>
+     </div>
+    <div class="slds-form-element">
+      <label class="slds-form-element__label" for="inputSample2">Action on response</label>
+      <div class="slds-form-element__control">
+           <select id="select-01" class="slds-select">
+          <option>Select SMS Template</option>
+          <option>Option Two</option>
+          <option>Option Three</option>
+        </select>
+      </div>
+    </div>
+    <div class="slds-form-element">
+     <div class="slds-form-element__control">
+        <label class="slds-checkbox" for="opportunities-ownership1">
+          <input name="default" type="checkbox" id="opportunities-ownership1" />
+          <span class="slds-checkbox--faux"></span>
+          <span class="slds-form-element__label">Update on confirmation field</span>
+            <input class="slds-input" type="text" id="" />
+        </label>
+      </div>
+     </div>
+     <div class="slds-form-element">
+     <div class="slds-form-element__control">
+        <label class="slds-checkbox" for="opportunities-ownership2">
+          <input name="default" type="checkbox" id="opportunities-ownership2" />
+          <span class="slds-checkbox--faux"></span>
+          <span class="slds-form-element__label">Create followup task on keyword</span>
+            <input class="slds-input" type="text" id="" />
+        </label>
+      </div>
+     </div>
+   
+    <fieldset class="slds-form-element">
+      <div class="slds-form-element__control">
+           <label class="slds-checkbox" for="opportunities-ownership3">
+          <input name="default" type="checkbox" id="opportunities-ownership3" />
+          <span class="slds-checkbox--faux"></span>
+          <span class="slds-form-element__label">Send Appointment Reminder</span>
+        </label>
+        <label class="slds-checkbox" for="opportunities-ownership4">
+          <input name="default" type="checkbox" id="opportunities-ownership4" />
+          <span class="slds-checkbox--faux"></span>
+          <span class="slds-form-element__label">1 Hour prior</span>
+        </label>
+        <label class="slds-checkbox" for="contact-ownership5">
+          <input name="default" type="checkbox" id="contact-ownership5" />
+          <span class="slds-checkbox--faux"></span>
+          <span class="slds-form-element__label">24 Hour prior</span>
+        </label>
+      </div>
+    </fieldset>
+      <div class="slds-form-element__control">
+           <label class="slds-checkbox" for="opportunities-ownership6">
+          <input name="default" type="checkbox" id="opportunities-ownership6" />
+          <span class="slds-checkbox--faux"></span>
+          <span class="slds-form-element__label">Send Test Drive Notification</span>
+        </label>
+      </div>
+    <div class="slds-form-element">
+      <div class="slds-form-element__control">
+           <select id="select-01" class="slds-select">
+          <option>Select SMS Template</option>
+          <option>Option Two</option>
+          <option>Option Three</option>
+        </select>
+      </div>
+    </div>
+    <div class="slds-form-element">
+      <button class="slds-button slds-button--brand" type="button">Save</button>
+    </div>
+  </div>
+        </fieldset>
+    </div>
+</div>
+<!-- / PRIMARY CONTENT WRAPPER -->
+  
+    <!-- FOOTER -->
+<footer role="contentinfo" class="slds-p-around--large">
+  <!-- LAYOUT GRID -->
+  <div class="slds-grid slds-grid--align-spread">
+    <p class="slds-col">Salesforce Lightning Design System Example</p>
+    <p class="slds-col">&copy; Zen4orce</p>
+  </div>
+  <!-- / LAYOUT GRID -->
+</footer>
+<!-- / FOOTER -->
+    
+  </div>
+  <!-- / REQUIRED SLDS WRAPPER -->    
+</body>    
+<!-- JAVASCRIPT -->
+    
+<!-- / JAVASCRIPT -->    
+</html>
+</apex:page>
