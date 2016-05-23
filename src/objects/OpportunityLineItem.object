@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <actionOverrides>
+        <actionName>AddProduct</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>CancelEdit</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>ChoosePricebook</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Delete</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Edit</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>EditAllProduct</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>SaveEdit</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>View</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <compactLayoutAssignment>SYSTEM</compactLayoutAssignment>
+    <enableFeeds>false</enableFeeds>
+    <fields>
+        <fullName>AGMT__Augment_ID__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Augment ID</label>
+        <length>80</length>
+        <required>false</required>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>AGMT__Model_Name__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Model Name</label>
+        <length>80</length>
+        <required>false</required>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>AGMT__Model_Thumbnail__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <formula>IF(
+ISBLANK(AGMT__Augment_ID__c),
+IF(
+ISBLANK( PricebookEntry.Product2.AGMT__Augment_ID__c) ,
+&apos;&apos;,
+IMAGE(PricebookEntry.Product2.AGMT__Thumbnail__c, &quot;Model Thumbnail&quot;, 100, 100)),
+IMAGE(
+IF(
+ISBLANK(AGMT__Thumbnail__c), 
+&apos;/resource/placeholder_thumbnail&apos;, 
+AGMT__Thumbnail__c
+),
+ &quot;Model Thumbnail&quot;, 100, 100)
+)</formula>
+        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+        <label>3D Model Thumbnail</label>
+        <required>false</required>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>AGMT__Op_Augment_ID__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Used in Coca-Cola Package</description>
+        <externalId>false</externalId>
+        <formula>IF(ISBLANK(AGMT__Augment_ID__c), IF(ISBLANK( PricebookEntry.Product2.AGMT__Augment_ID__c ),&quot;&quot;,PricebookEntry.Product2.AGMT__Augment_ID__c),AGMT__Augment_ID__c)</formula>
+        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+        <label>Op Augment ID</label>
+        <required>false</required>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>AGMT__Op_Model_Name__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Used in SelectModelsController used in Coca-Cola package</description>
+        <externalId>false</externalId>
+        <formula>IF(ISBLANK(AGMT__Model_Name__c), IF(ISBLANK( PricebookEntry.Product2.AGMT__Model_Name__c ),&quot;&quot;,PricebookEntry.Product2.AGMT__Model_Name__c),AGMT__Model_Name__c)</formula>
+        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+        <label>3D Model Name</label>
+        <required>false</required>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>AGMT__Thumbnail__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Url for the thumbnail
+Used in SelectModelsController used in Coca-Cola package</description>
+        <externalId>false</externalId>
+        <label>Thumbnail</label>
+        <length>255</length>
+        <required>false</required>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Description</fullName>
+    </fields>
+    <fields>
+        <fullName>Discount</fullName>
+    </fields>
+    <fields>
+        <fullName>ListPrice</fullName>
+    </fields>
+    <fields>
+        <fullName>OpportunityId</fullName>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>Product2Id</fullName>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>ProductCode</fullName>
+    </fields>
+    <fields>
+        <fullName>Quantity</fullName>
+    </fields>
+    <fields>
+        <fullName>ServiceDate</fullName>
+    </fields>
+    <fields>
+        <fullName>Subtotal</fullName>
+    </fields>
+    <fields>
+        <fullName>TotalPrice</fullName>
+    </fields>
+    <fields>
+        <fullName>UnitPrice</fullName>
+    </fields>
+    <webLinks>
+        <fullName>AGMT__Select_Model</fullName>
+        <availability>online</availability>
+        <displayType>button</displayType>
+        <height>600</height>
+        <linkType>page</linkType>
+        <masterLabel>Select 3D Model</masterLabel>
+        <openType>noSidebar</openType>
+        <page>AGMT__SelectModelsPage</page>
+        <protected>false</protected>
+    </webLinks>
+</CustomObject>

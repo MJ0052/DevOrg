@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Employee</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Employees</value>
+    </caseValues>
+    <fields>
+        <label><!-- Address --></label>
+        <name>Address__c</name>
+    </fields>
+    <fields>
+        <label><!-- Age --></label>
+        <name>Age__c</name>
+    </fields>
+    <fields>
+        <label><!-- Annual CTC --></label>
+        <name>Annual_CTC__c</name>
+    </fields>
+    <fields>
+        <label><!-- City --></label>
+        <name>City__c</name>
+        <picklistValues>
+            <masterLabel>Bhopal</masterLabel>
+            <translation><!-- Bhopal --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Gandhi Nagar</masterLabel>
+            <translation><!-- Gandhi Nagar --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Guntur</masterLabel>
+            <translation><!-- Guntur --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Hyderabad</masterLabel>
+            <translation><!-- Hyderabad --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Mumbai</masterLabel>
+            <translation><!-- Mumbai --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Pune</masterLabel>
+            <translation><!-- Pune --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Surat</masterLabel>
+            <translation><!-- Surat --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- Current Employee --></label>
+        <name>Current_Employee__c</name>
+    </fields>
+    <fields>
+        <label><!-- Date Of Birth --></label>
+        <name>Date_Of_Birth__c</name>
+    </fields>
+    <fields>
+        <label><!-- Date of Joining --></label>
+        <name>Date_of_Joining__c</name>
+    </fields>
+    <fields>
+        <label><!-- Department --></label>
+        <name>Department__c</name>
+        <relationshipLabel><!-- Employees_Department --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- Education --></label>
+        <name>Education__c</name>
+        <picklistValues>
+            <masterLabel>B Sc.</masterLabel>
+            <translation><!-- B Sc. --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B Tech.</masterLabel>
+            <translation><!-- B Tech. --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>BCA</masterLabel>
+            <translation><!-- BCA --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>BE</masterLabel>
+            <translation><!-- BE --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>MCA</masterLabel>
+            <translation><!-- MCA --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>ME</masterLabel>
+            <translation><!-- ME --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- Email --></label>
+        <name>Email__c</name>
+    </fields>
+    <fields>
+        <label><!-- FLS for Age --></label>
+        <name>FLS_for_Age__c</name>
+    </fields>
+    <fields>
+        <label><!-- FLS for SSN --></label>
+        <name>FLS_for_SSN__c</name>
+    </fields>
+    <fields>
+        <label><!-- First Name --></label>
+        <name>First_Name__c</name>
+    </fields>
+    <fields>
+        <label><!-- Full Name --></label>
+        <name>Full_Name__c</name>
+    </fields>
+    <fields>
+        <label><!-- Is Active --></label>
+        <name>Is_Active__c</name>
+    </fields>
+    <fields>
+        <label><!-- Is on Notice Period --></label>
+        <name>Is_on_Notice_Period__c</name>
+    </fields>
+    <fields>
+        <label><!-- Last Name --></label>
+        <name>Last_Name__c</name>
+    </fields>
+    <fields>
+        <label><!-- Manager Email --></label>
+        <name>Manager_Email__c</name>
+    </fields>
+    <fields>
+        <label><!-- Manager --></label>
+        <name>Manager__c</name>
+        <relationshipLabel><!-- Employees_Child --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- Resignation Date --></label>
+        <name>Resignation_Date__c</name>
+    </fields>
+    <fields>
+        <label><!-- Role Unique ID --></label>
+        <name>Role_Unique_ID__c</name>
+    </fields>
+    <fields>
+        <label><!-- Role --></label>
+        <name>Role__c</name>
+        <relationshipLabel><!-- Employees --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- SSN --></label>
+        <name>SSN__c</name>
+    </fields>
+    <fields>
+        <label><!-- Salary Credited Till Date --></label>
+        <name>Salary_Credited_Till_Date__c</name>
+    </fields>
+    <fields>
+        <label><!-- Skills --></label>
+        <name>Skills__c</name>
+        <picklistValues>
+            <masterLabel>Apex</masterLabel>
+            <translation><!-- Apex --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>C#</masterLabel>
+            <translation><!-- C# --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Dot Net</masterLabel>
+            <translation><!-- Dot Net --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Force.com</masterLabel>
+            <translation><!-- Force.com --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>HR</masterLabel>
+            <translation><!-- HR --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Java</masterLabel>
+            <translation><!-- Java --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Operations</masterLabel>
+            <translation><!-- Operations --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>PHP</masterLabel>
+            <translation><!-- PHP --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Project Management</masterLabel>
+            <translation><!-- Project Management --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Project Planning</masterLabel>
+            <translation><!-- Project Planning --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>QA</masterLabel>
+            <translation><!-- QA --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Salesforce</masterLabel>
+            <translation><!-- Salesforce --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- State --></label>
+        <name>State__c</name>
+        <picklistValues>
+            <masterLabel>AP</masterLabel>
+            <translation><!-- AP --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Gujarat</masterLabel>
+            <translation><!-- Gujarat --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>MP</masterLabel>
+            <translation><!-- MP --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Maharashtra</masterLabel>
+            <translation><!-- Maharashtra --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- Status --></label>
+        <name>Status__c</name>
+    </fields>
+    <fields>
+        <label><!-- Street --></label>
+        <name>Street__c</name>
+    </fields>
+    <fields>
+        <label><!-- Zip --></label>
+        <name>Zip__c</name>
+    </fields>
+    <layouts>
+        <layout>Employee Layout</layout>
+        <sections>
+            <label><!-- Address Details --></label>
+            <section>Address Details</section>
+        </sections>
+        <sections>
+            <label><!-- Custom Links --></label>
+            <section>Custom Links</section>
+        </sections>
+        <sections>
+            <label><!-- Department Details --></label>
+            <section>Department Details</section>
+        </sections>
+        <sections>
+            <label><!-- Employee Details --></label>
+            <section>Employee Details</section>
+        </sections>
+        <sections>
+            <label><!-- Salary Details --></label>
+            <section>Salary Details</section>
+        </sections>
+    </layouts>
+    <layouts>
+        <layout>Non Techincal Layout</layout>
+        <sections>
+            <label><!-- Custom Links --></label>
+            <section>Custom Links</section>
+        </sections>
+        <sections>
+            <label><!-- Fields --></label>
+            <section>Fields</section>
+        </sections>
+        <sections>
+            <label><!-- Non Technical User Layout --></label>
+            <section>Non Technical User Layout</section>
+        </sections>
+    </layouts>
+    <layouts>
+        <layout>Techincal Layout</layout>
+        <sections>
+            <label><!-- Custom Links --></label>
+            <section>Custom Links</section>
+        </sections>
+        <sections>
+            <label><!-- Fields --></label>
+            <section>Fields</section>
+        </sections>
+        <sections>
+            <label><!-- Technical User Layout --></label>
+            <section>Technical User Layout</section>
+        </sections>
+    </layouts>
+    <recordTypes>
+        <label><!-- Non Techincal --></label>
+        <name>Non_Techincal</name>
+    </recordTypes>
+    <recordTypes>
+        <label><!-- Techincal --></label>
+        <name>Techincal</name>
+    </recordTypes>
+    <startsWith>Consonant</startsWith>
+    <validationRules>
+        <errorMessage><!-- Employee age should be greater than or equal to 18 --></errorMessage>
+        <name>Age_Validation</name>
+    </validationRules>
+    <validationRules>
+        <errorMessage><!-- Employee age should be between 21 - 30 --></errorMessage>
+        <name>Age_between_21_to_30</name>
+    </validationRules>
+    <validationRules>
+        <errorMessage><!-- Please provide a valid Date of birth. Employee cannot be less than 18 years of Age. --></errorMessage>
+        <name>DOB_Validation</name>
+    </validationRules>
+    <validationRules>
+        <errorMessage><!-- SSN number length should be less than 10 --></errorMessage>
+        <name>SSN_Length</name>
+    </validationRules>
+</CustomObjectTranslation>

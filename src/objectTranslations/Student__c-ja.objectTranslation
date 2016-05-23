@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value><!-- Student --></value>
+    </caseValues>
+    <fields>
+        <label>JP_City</label>
+        <name>City__c</name>
+    </fields>
+    <fields>
+        <label>JP_Country</label>
+        <name>Country__c</name>
+    </fields>
+    <fields>
+        <label>JP_Course Applying for</label>
+        <name>Course_Applying_for__c</name>
+        <picklistValues>
+            <masterLabel>B.Arch</masterLabel>
+            <translation><!-- B.Arch --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B.C.A</masterLabel>
+            <translation><!-- B.C.A --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B.E</masterLabel>
+            <translation><!-- B.E --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>M.C.A</masterLabel>
+            <translation><!-- M.C.A --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>JP_Gender</label>
+        <name>Gender__c</name>
+        <picklistValues>
+            <masterLabel>Female</masterLabel>
+            <translation><!-- Female --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Male</masterLabel>
+            <translation><!-- Male --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>JP_H.S.C %</label>
+        <name>H_S_C__c</name>
+    </fields>
+    <fields>
+        <label>JP_Roll Number</label>
+        <name>Roll_Number__c</name>
+    </fields>
+    <fields>
+        <label>JP_S.S.C %</label>
+        <name>S_S_C__c</name>
+    </fields>
+    <fields>
+        <label>JP_State</label>
+        <name>State__c</name>
+    </fields>
+    <fields>
+        <label>JP_Student Name</label>
+        <name>Student_Name__c</name>
+    </fields>
+    <nameFieldLabel><!-- Title --></nameFieldLabel>
+</CustomObjectTranslation>
